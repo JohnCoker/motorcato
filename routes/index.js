@@ -10,7 +10,7 @@ const express = require('express'),
 router.get('/', function(req, res, next) {
 
   // load info on notifications
-  req.pool.query('select id, date, url, headline from notifications order by date desc', (err, q) => {
+  req.pool.query('select id, date, url, headline from notifications where not expired order by date desc', (err, q) => {
     if (err)
       return next(err);
 
