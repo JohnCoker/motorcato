@@ -1,11 +1,9 @@
 body {
-  padding: 50px;
+  padding: 1em;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
-h1 {
-  margin-top: 0.5em;
-}
 footer {
+  margin-top: 1em;
   border-top: 1px solid #999;
   padding-top: 2pt;
   font-size: smaller;
@@ -21,9 +19,16 @@ nav a.p-2 {
   text-transform: uppercase;
   font-weight: bolder;
 }
+img.img-responsive {
+  max-width: 100%;
+}
 
-table.notifications {
-  margin-bottom: 0.5em;
+table.notifications td {
+  padding: 3pt 0;
+}
+table.notifications td.date {
+  white-space: nowrap;
+  vertical-align: top;
 }
 table.notifications td.headline {
   padding-left: 1em;

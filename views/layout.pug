@@ -7,8 +7,8 @@ html(lang="en")
     link(rel='stylesheet', href='/stylesheets/style.css')
     title #{title} (MESS)
   body
-    .header.d-flex.flex-column.flex-md-row.align-items-center.p-3.px-md-4.mb-3.bg-white.border-bottom.shadow-sm.fixed-top
-      h5.my-0.mr-md-auto.font-weight-normal
+    .header.d-flex.flex-column.flex-md-row.align-items-center.p-3.px-md-4.mb-3.bg-white.border-bottom.static-top
+      h5.my-0.mr-md-auto.font-weight-normal.d-none.d-sm-inline
         b M
         | alfunctioning 
         b E
@@ -17,6 +17,7 @@ html(lang="en")
         | tatistical 
         b S
         |urvey
+      h5.my-0.mr-md-auto.font-weight-normal.d-sm-none M.E.S.S.
       nav.my-2.my-md-0.mr-md-3
         a.p-2.text-dark(href='/') Home
         a.p-2.text-dark(href='/report') Report
