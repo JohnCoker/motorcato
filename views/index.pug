@@ -1,0 +1,36 @@
+extends layout
+
+block content
+  h1= title
+  p
+    | The Malfunctioning Engine Statistical Survey (MESS) is a joint organization program that allows 
+    a(href='https://www.nar.org/nar-motor-testing/') NAR Standards &amp; Testing
+    | , 
+    a(href='http://www.tripoli.org/TMT') Tripoli Motor Testing
+    |  and the 
+    a(href='http://www.canadianrocketry.org/mcc_about.php') CAR Motor Certification Committee
+    |  to track field trends in the reliability of sport rocket motors.
+    | Remember how disappointed you were when this happened?
+  blockquote
+    img(src='images/cato.png')
+  p
+    | Help your fellow rocketry community by 
+    a(href='/report') documenting your unfortunate experience
+    | .
+    |  An unusual number of consumer reported incidences on a particular engine type or lot number can trigger retesting
+    | of the product, manufacturer recall, or even decertification.
+  p
+    | On this site you can also 
+    a(href='/search') find reports for specific motors
+    |  or 
+    a(href='/latest') view the latest reports
+    | .
+
+  h2 Notifications
+  table.notifications
+    each row in notifications
+      tr
+        td.date= row.dateStr
+        td.headline
+          a(href=row.url)= row.headline
+          
