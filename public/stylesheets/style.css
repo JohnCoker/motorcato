@@ -2,11 +2,12 @@ body {
   padding: 1em;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
-footer {
-  margin-top: 1em;
-  border-top: 1px solid #999;
-  padding-top: 2pt;
-  font-size: smaller;
+img.img-responsive {
+  max-width: 100%;
+}
+
+.header img.logo {
+  margin-right: 0.5em;
 }
 nav a:hover {
   text-decoration: none;
@@ -19,8 +20,11 @@ nav a.p-2 {
   text-transform: uppercase;
   font-weight: bolder;
 }
-img.img-responsive {
-  max-width: 100%;
+footer {
+  margin-top: 1em;
+  border-top: 1px solid #999;
+  padding-top: 2pt;
+  font-size: smaller;
 }
 
 table.notifications td {
