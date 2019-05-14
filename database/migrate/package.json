@@ -1,0 +1,12 @@
+{
+  "name": "migrate",
+  "version": "1.0.0",
+  "description": "import MESS reports from prior DB CSV dump",
+  "main": "index.js",
+  "author": "John Coker <john@jcsw.com> (http://johncoker.com/)",
+  "license": "Unlicense",
+  "dependencies": {
+    "csv-parse": "^4.4.1",
+    "pg": "^7.10.0"
+  }
+}

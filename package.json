@@ -1,7 +1,8 @@
 {
   "name": "motorcato",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.0.1",
+  "author": "John Coker <john@jcsw.com> (http://johncoker.com/)",
+  "license": "Unlicense",
   "scripts": {
     "start": "node ./bin/www"
   },

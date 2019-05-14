@@ -2,10 +2,14 @@
 
 The site is backed by a PostgreSQL database, from which all dynamic content is built. See `schema.sql` for the tables.
 
-## History
+## Seed Data & History
 
-The `history` directory contains data from the old site and collected by hand from email MESS reports. This gets turned
-into seed data loaded by hand when the site is brought up.
+The `seed` directory contains hand-created rows that bring seed the database. The `migrate` directory contains a program
+which reads a CSV file dumped from the old MS SQL Server database and generates a file of SQL statements to migrate that
+data into the new form (for PostgreSQL).
+
+Note that the migrate program does not drop any data, but it does mark some obviously invalid rows as "rejected" (when
+the manufacturer or engine code is invalid).
 
 ## Development
 
