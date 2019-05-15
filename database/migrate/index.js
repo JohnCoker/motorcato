@@ -25,9 +25,20 @@ const Manufacturers = {
 function convertDate(v) {
   let m;
 
+  if (v == '2-Sep.-2017')
+    return '2017-10-02';
+  if (v == 'September 10th 216')
+    return '2016-10-10';
+  if (v == '06/1402015')
+    return '2015-06-14';
+  if (v == '6-25 16')
+    return '2016-06-25';
+  if (v == '6/318')
+    return '2018-06-03';
+
   function date(y, m, d) {
     let year = parseInt(y);
-    if (isNaN(year) || !(year >= 10))
+    if (isNaN(year) || !(year > 0))
       return;
     if (year < 100)
       year += 2000;
@@ -59,13 +70,19 @@ function convertDate(v) {
     return year.toFixed() + '-' + pad2(month) + '-' + pad2(day);
   }
 
-  if (m = /^([a-z]+)  *(\d+)(?:[^,]*,)?  *(\d{4})/i.exec(v)) {
+  if (m = /^Saturday,? *(.*)$/i.exec(v))
+    v = m[1];
+
+  if (m = /^([a-z]+)\.?  *(\d+)[a-z]*?,? *(\d{4})/i.exec(v)) {
     // February 2nd, 2013
     return date(m[3], m[1], m[2]);
   } else if (m = /^(\d+)-([a-z]+)-(\d{2})$/i.exec(v)) {
     // 19-Jul-13
     return date(m[3], m[2], m[1]);
-  } else if (m = /^(\d+)\/(\d+)\/(\d{2})$/.exec(v)) {
+  } else if (m = /^(\d+)[a-z]* +([a-z]+)[,.]? *(\d{2,4})/i.exec(v)) {
+    // 5th May 2019
+    return date(m[3], m[2], m[1]);
+  } else if (m = /^(\d+)[/. -](\d+)[/. -](\d{2,4}) */.exec(v)) {
     // 7/22/13
     return date(m[3], m[1], m[2]);
   }
@@ -82,7 +99,7 @@ function convertTemperature(v) {
     return parseInt(m[1]);
 
   // 60-70
-  m = /^[^\d]*(-?\d+) *- *(-?\d+)[^\d]*$/.exec(v);
+  m = /^[^\d]*(-?\d+) *(?:-|to) *(-?\d+)[^\d]*$/.exec(v);
   if (m)
     return Math.round((parseInt(m[1]) + parseInt(m[2])) / 2);
 }
@@ -242,7 +259,7 @@ const FieldMap = {
 
 const out = fs.createWriteStream(outfile);
 const verbose = false;
-out.write('# migrated ' + new Date().toISOString() + '\n');
+out.write('-- migrated ' + new Date().toISOString() + '\n');
 let total = 0, rejected = 0, lineNum = 1;
 fs.createReadStream(infile)
   .pipe(csv({ trim: true, skipEmptyLines: true, columns: true }))
@@ -261,8 +278,11 @@ fs.createReadStream(infile)
         throw new Error('line ' + lineNum + ': unknown field: ' + key);
 
       if (value != null) {
-        if (typeof map.convert == 'function')
+        if (typeof map.convert == 'function') {
           value = map.convert(value);
+          if (value == null && verbose)
+            console.log('line ' + lineNum + ': invalid  ' + key + ': ' + row[key]);
+        }
 
         if (map.validate != null) {
           if (map.validate instanceof RegExp) {

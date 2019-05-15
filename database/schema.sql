@@ -18,6 +18,7 @@ create type motor_type as enum (
 );
 create table reports (
   id serial primary key,
+  created_at timestamp not null default now(),
   manufacturer text not null,
   designation text not null,
   common_name text,
@@ -34,7 +35,7 @@ create table reports (
   burn_through_loc text,
   fail_no_ejection boolean default false,
   fail_bad_delay boolean default false,
-  actual_delay numeric(2,1),
+  actual_delay numeric,
   fail_other boolean default false,
   other_desc text,
   reported_mfr boolean default false,
