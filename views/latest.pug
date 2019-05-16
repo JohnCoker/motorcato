@@ -2,3 +2,41 @@ extends layout
 
 block content
   h1= title
+  p
+    | The last 
+    = last_count
+    |  motors with failure reports and the 
+    a(href='#most')
+      | top 
+      = most_count
+      |  reported motors of all time
+    | .
+    | For more detailed search, see the 
+    a(href='/search') search page
+    | .
+
+  a(name='last')
+  h2 Most Recent
+  include latest-table.pug
+
+  a(name='most')
+  h2 Top of All Time
+  include latest-table.pug
+
+  p
+    | Back up to 
+    a(href='#last') the Most Recent motors
+    | .
+
+block scripts
+  script(type='text/javascript')
+    | $(document).ready(function() {
+    |   $('table.table').DataTable({
+    |     paging: false,
+    |     info: false,
+    |     columnDefs: [
+    |       { type: "num", targets: 3 },
+    |     ],
+    |     order: [[ 2, "desc" ]],
+    |   });
+    | });

@@ -4,11 +4,7 @@ const express = require('express'),
       escape = require('escape-html'),
       MarkdownIt = require('markdown-it');
 
-/*
- * home
- */
 router.get('/', function(req, res, next) {
-
   // load info on notifications
   req.pool.query('select id, date, url, headline from notifications where not expired order by date desc', (err, q) => {
     if (err)
@@ -34,37 +30,6 @@ router.get('/', function(req, res, next) {
   });
 });
 
-/*
- * /report
- */
-router.get('/report', function(req, res, next) {
-  res.render('report', { title: 'Report a Malfunction' });
-});
-router.post('/report', function(req, res, next) {
-  res.render('report', { title: 'Report a Malfunction' });
-});
-
-/*
- * /latest
- */
-router.get('/latest', function(req, res, next) {
-  res.render('latest', { title: 'Latest Malfunction Reports' });
-});
-
-/*
- * /search
- */
-const SearchTitle = 'Search Malfunction Reports';
-router.get('/search', function(req, res, next) {
-  res.render('search', { title: SearchTitle });
-});
-router.post('/search', function(req, res, next) {
-  res.render('search', { title: SearchTitle });
-});
-
-/*
- * /notification
- */
 router.get('/notification/:id', function(req, res, next) {
   // load single notification
   req.pool.query('select * from notifications where id = $1', [req.params.id], (err, q) => {

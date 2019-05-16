@@ -1,0 +1,16 @@
+table.failures.table.dt-responsive
+  thead
+    tr
+      th Manufacturer
+      th Motor
+      th Last
+      th Count
+  tbody
+    each row in most
+      tr
+        td
+          a(href=row.manufacturer_search)= row.manufacturer
+        td
+          a(href=row.motor_search)= row.common_name
+        td(data-sort=row.last_date_iso)= row.last_date_local
+        td= row.count

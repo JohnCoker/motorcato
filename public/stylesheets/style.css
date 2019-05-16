@@ -37,3 +37,7 @@ table.notifications td.date {
 table.notifications td.headline {
   padding-left: 1em;
 }
+
+.dataTables_filter {
+  float: left !important;
+}

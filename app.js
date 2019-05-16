@@ -5,9 +5,6 @@ const createError = require('http-errors'),
       logger = require('morgan'),
       { Pool } = require('pg');
 
-const indexRouter = require('./routes/index'),
-      adminRouter = require('./routes/admin');
-
 const connStr = process.env.DATABASE_URL;
 if (connStr == null || connStr === '')
   throw new Error('DATABASE_URL environment variable not set!');
@@ -33,8 +30,11 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.use('/', indexRouter);
-app.use('/admin', adminRouter);
+app.use('/', require('./routes/index'));
+app.use('/', require('./routes/report'));
+app.use('/', require('./routes/latest'));
+app.use('/', require('./routes/search'));
+app.use('/admin', require('./routes/admin'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
