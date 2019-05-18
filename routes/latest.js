@@ -1,6 +1,9 @@
 const express = require('express'),
       router = express.Router(),
-      moment = require('moment');
+      moment = require('moment'),
+      searchURL = require('./util.js').searchURL,
+      formatDateISO = require('./util.js').formatDateISO,
+      formatDateLocal = require('./util.js').formatDateLocal;
 
 const LatestSelect = `
 select manufacturer, common_name, max(failure_date) as last_date, count(*)
@@ -28,25 +31,15 @@ router.get('/latest', function(req, res, next) {
   };
 
   function table(q) {
-    function search(o) {
-      let s = '/search';
-      Object.keys(o).forEach((k, i) => {
-        s += i == 0 ? '?' : '&';
-        s += k;
-        s += '=';
-        s += encodeURIComponent(o[k]);
-      });
-      return s;
-    }
     return q.rows.map(r => {
       return {
         manufacturer: r.manufacturer,
         common_name: r.common_name,
-        last_date_iso: moment(r.last_date).format('YYYY-MM-DD'),
-        last_date_local: moment(r.last_date).format('MMM D YYYY'),
+        last_date_iso: formatDateISO(r.last_date),
+        last_date_local: formatDateLocal(req, r.last_date),
         count: r.count,
-        manufacturer_search: search({ manufacturer: r.manufacturer }),
-        motor_search: search({ manufacturer: r.manufacturer, common_name: r.common_name }),
+        manufacturer_search: searchURL({ manufacturer: r.manufacturer }),
+        motor_search: searchURL({ manufacturer: r.manufacturer, common_name: r.common_name }),
       };
     });
   };

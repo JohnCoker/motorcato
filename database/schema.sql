@@ -53,6 +53,7 @@ create table reports (
   reporter_nar text,
   reporter_car text,
   reporter_tra text,
+  reporter_ukra text,
   old_id integer,
   rejected boolean not null default false
 );
