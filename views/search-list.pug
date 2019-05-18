@@ -1,0 +1,28 @@
+extends layout
+
+block content
+  h1= title
+
+  table.failures.table.dt-responsive
+    thead
+      tr
+        th Details
+        th Manufacturer
+        th Motor
+        th Date
+        th Type
+        th Failure
+        th Location
+    tbody
+      each row in results
+        tr
+          td
+            a(href=row.id_search)= row.id
+          td
+            a(href=row.manufacturer_search)= row.manufacturer
+          td
+            a(href=row.motor_search)= row.common_name
+          td(data-sort=row.failure_date_iso)= row.failure_date_local
+          td= row.motor_type
+          td= row.fail_summary
+          td= row.location
