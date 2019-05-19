@@ -2,3 +2,187 @@ extends layout
 
 block content
   h1= title
+
+  style(type="text/css")
+    | form { border: 1px solid #bbb; padding: 1em; }
+    | .form-row.section:not(:first-child) { border-top: 1px solid #bbb; }
+    | .form-row.captcha { padding-top: 0.25em; }
+    | .form-row.submit { margin-top: 0.25em; }
+    | .form-check { margin-bottom: 0.5em; }
+    | label input { margin-top: 0.2em; }
+
+  p To report a failure with a model or high-power rocket engine, complete and submit this form.
+
+  each error in errors
+    div(role="alert").alert.alert-warning= error
+
+  form(method="post", action="/report")
+    .form-row.section
+      .form-col
+        h2 Engine Data
+        p This data is about the motor and is all required.
+    .form-row
+      .form-col.col-md-4
+        .form-group
+          label(for="manufacturer") Manufacturer:
+          select(name="manufacturer" required="true").form-control
+            option(val="", disabled="true" hidden="true" selected="true") (select)
+            each mfr in manufacturers
+              option= mfr
+      .form-col.col-md-4
+        .form-group
+          label(for="designation") Designation:
+          input(type="text", name="designation" placeholder="C6-5" required="true" value=designation).form-control
+      .form-col.col-md-4
+        .form-group
+          label(for="motor_type") Type:
+          select(name="motor_type" required="true").form-control
+            option(val="", disabled="true" hidden="true" selected="true") (select)
+            option(val="SU") single-use
+            option reload
+            option hybrid
+
+    .form-row.section
+      .form-col
+        h2 Failure Data
+        p This data is about the failure, please fill in as much as you can.
+    .form-row
+      .form-col.col-md-4
+        .form-group
+          label(for="failure_date") Date of Failure:
+          input(type="date", name="failure_date" value=failure_date).form-control
+      .form-col.col-md-4
+        .form-group
+          label(for="location") Geographic Location:
+          input(type="text", name="location" value=location).form-control
+      .form-col.col-md-4
+        .form-group
+          label(for="temperature") Approximate Temperature (℉):
+          input(type="number", name="temperature" value=temperature).form-control
+    .form-row
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_nozzle_blown" value=fail_nozzle_blown).form-check-input
+          label(for="fail_nozzle_blown").form-check-label Nozzle blown out
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_ejection_blown" value=fail_ejection_blown).form-check-input
+          label(for="fail_ejection_blown").form-check-label Ejection end blown out
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_casing_split" value=fail_casing_split).form-check-input
+          label(for="fail_casing_split").form-check-label Casing split
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_propellant_ejected" value=fail_propellant_ejected).form-check-input
+          label(for="fail_propellant_ejected").form-check-label Burning propellant ejected
+    .form-row
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_burn_through" value=fail_burn_through).form-check-input
+          label(for="fail_burn_through").form-check-label Casing burned through (describe where)
+            input(type="text" name="burn_through_loc" value=burn_through_loc).form-control
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_no_ejection" value=fail_no_ejection).form-check-input
+          label(for="fail_no_ejection").form-check-label No ejection charge (cap retained)
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_bad_delay" value=fail_bad_delay).form-check-input
+          label(for="fail_bad_delay").form-check-label Delay inaccurate (estimate actual delay)
+            input(type="number" name="actual_delay" value=actual_delay).form-control
+      .form-col.col-md-3
+    .form-row
+      .form-col.col-md-6
+        .form-check
+          input(type="checkbox" name="fail_other" value=fail_other).form-check-input
+          label(for="fail_other").form-check-label Other failure (describe)
+        .form-group
+          textarea(name="other_desc" width="100%" value=other_desc).form-control
+      .form-col.col-md-6
+    .form-row
+      .form-col.col-md-6
+        .form-check
+          input(type="checkbox" name="reported_mfr" value=reported_mfr).form-check-input
+          label(for="reported_mfr").form-check-label Already reported to manufacturer
+        .form-check
+          input(type="checkbox" name="more_motors" value=more_motors).form-check-input
+          label(for="more_motors").form-check-label I still have this motor or others from the same pack
+      .form-col.col-md-6
+
+    .form-row.section
+      .form-col.col-md-6
+        h2 Comments
+        p Any extra information, including how long the motor burned before failure, is helpful.
+        .form-group
+          textarea(name="comments" rows="4" value=comments).form-control
+      .form-col.col-md-6
+
+    .form-row.section
+      .form-col
+        h2 Reported By
+        p
+          | All of this information is optional, but we appreciate at least an email address in case we need more
+          |  info. None of this will be publicly visible.
+    .form-row
+      .form-col.col-md-6
+        .form-group
+          label(for="reporter_name") Submitter name
+          input(type="text" name="reporter_name" autocomplete="name" value=reporter_name).form-control
+      .form-col.col-md-6
+        .form-group
+          label(for="reporter_email") E-mail
+          input(type="email" name="reporter_email" autocomplete="email" value=reporter_email).form-control
+    .form-row
+      .form-col.col-md-6
+        .form-group
+          label(for="reporter_addr1") Address
+          input(type="text" name="reporter_addr1" autocomplete="street-address" value=reporter_addr1).form-control
+        .form-group
+          input(type="text" name="reporter_addr2" value=reporter_addr2).form-control
+      .form-col.col-md-6
+    .form-row
+      .form-col.col-md-3
+        .form-group
+          label(for="reporter_city") City
+          input(type="text" name="reporter_city" autocomplete="locality" value=reporter_city).form-control
+      .form-col.col-md-3
+        .form-group
+          label(for="reporter_state") State
+          input(type="text" name="reporter_state" autocomplete="region" value=reporter_state).form-control
+      .form-col.col-md-3
+        .form-group
+          label(for="reporter_zip") Zip
+          input(type="text" name="reporter_zip" autocomplete="postal-code" value=reporter_zip).form-control
+      .form-col.col-md-3
+        .form-group
+          label(for="reporter_phone") Telephone
+          input(type="text" name="reporter_phone" autocomplete="tel" value=reporter_phone).form-control
+    .form-row
+      .form-col.col-md-3
+        .form-group
+          label(for="reporter_nar") NAR number
+          input(type="number" name="reporter_nar" value=reporter_nar).form-control
+      .form-col.col-md-3
+        .form-group
+          label(for="reporter_car") CAR number
+          input(type="number" name="reporter_car" value=reporter_car).form-control
+      .form-col.col-md-3
+        .form-group
+          label(for="reporter_tra") TRA number
+          input(type="number" name="reporter_tra" value=reporter_tra).form-control
+      .form-col.col-md-3
+        .form-group
+          label(for="reporter_ukra") UKRA number
+          input(type="number" name="reporter_ukra" value=reporter_ukra).form-control
+
+    .form-row.section.captcha
+      .form-col.col
+        .g-recaptcha(data-sitekey="6LcKw6IUAAAAACej4sPfC6wTyZ5pQQp2fSf2TolQ")
+    .form-row.submit
+      .form-col.col
+        button(type="submit").btn.btn-primary Submit
+        span &nbsp;
+        button(type="reset").btn.btn-secondary Reset
+
+  script(src="https://www.google.com/recaptcha/api.js" async defer)
