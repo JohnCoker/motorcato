@@ -4,19 +4,21 @@ block content
   h1= title
 
   style(type="text/css")
-    | form { border: 1px solid #bbb; padding: 1em; }
+    | form.report { border: 1px solid #bbb; padding: 1em; }
     | .form-row.section:not(:first-child) { border-top: 1px solid #bbb; }
     | .form-row.captcha { padding-top: 0.25em; }
     | .form-row.submit { margin-top: 0.25em; }
     | .form-check { margin-bottom: 0.5em; }
     | label input { margin-top: 0.2em; }
+    | i.help { margin-left: 0.25em; }
+    | .popover form { display: inline-block; margin-top: 0; margin-left: auto; margin-right: auto; }
 
   p To report a failure with a model or high-power rocket engine, complete and submit this form.
 
   each error in errors
     div(role="alert").alert.alert-warning= error
 
-  form(method="post", action="/report")
+  form(method="post", action="/report").report
     .form-row.section
       .form-col
         h2 Engine Data
@@ -24,18 +26,24 @@ block content
     .form-row
       .form-col.col-md-4
         .form-group
-          label(for="manufacturer") Manufacturer:
+          label(for="manufacturer")
+            | Manufacturer
+            i(data-content="The maker of the motor (engine)").help-simple
           select(name="manufacturer" required="true").form-control
             option(val="", disabled="true" hidden="true" selected="true") (select)
             each mfr in manufacturers
               option= mfr
       .form-col.col-md-4
         .form-group
-          label(for="designation") Designation:
+          label(for="designation")
+            | Designation
+            i(data-content="The official name of the motor (engine)").help-simple
           input(type="text", name="designation" placeholder="C6-5" required="true" value=designation).form-control
       .form-col.col-md-4
         .form-group
-          label(for="motor_type") Type:
+          label(for="motor_type")
+            | Type
+            i(data-content="What type of motor it is. If unsure, probably 'single-use'").help-simple
           select(name="motor_type" required="true").form-control
             option(val="", disabled="true" hidden="true" selected="true") (select)
             option(val="SU") single-use
@@ -49,16 +57,27 @@ block content
     .form-row
       .form-col.col-md-4
         .form-group
-          label(for="failure_date") Date of Failure:
+          label(for="failure_date")
+            | Date of Failure
+            i(data-content="The data the motor (engine) was used").help-simple
           input(type="date", name="failure_date" value=failure_date).form-control
       .form-col.col-md-4
         .form-group
-          label(for="location") Geographic Location:
+          label(for="location")
+            | Geographic Location
+            i(data-content="Where the motor (engine) was used").help-simple
           input(type="text", name="location" value=location).form-control
       .form-col.col-md-4
         .form-group
-          label(for="temperature") Approximate Temperature (℉):
+          label(for="temperature")
+            | Approximate Temperature (℉)
+            i.help.help-temp
           input(type="number", name="temperature" value=temperature).form-control
+    .form-row
+      .form-col
+        label
+          | How the motor failed
+          i(data-content="Check all that apply, and please enter additional info as appropriate").help-simple
     .form-row
       .form-col.col-md-3
         .form-check
@@ -127,29 +146,35 @@ block content
     .form-row
       .form-col.col-md-6
         .form-group
-          label(for="reporter_name") Submitter name
+          label(for="reporter_name")
+            | Submitter name
+            i(data-content="Please enter your name; this will not be publicly visible").help-simple
           input(type="text" name="reporter_name" autocomplete="name" value=reporter_name).form-control
       .form-col.col-md-6
         .form-group
-          label(for="reporter_email") E-mail
+          label(for="reporter_email")
+            | E-mail
+            i(data-content="Please enter your email address; this will not be publicly visible").help-simple
           input(type="email" name="reporter_email" autocomplete="email" value=reporter_email).form-control
     .form-row
       .form-col.col-md-6
         .form-group
-          label(for="reporter_addr1") Address
-          input(type="text" name="reporter_addr1" autocomplete="street-address" value=reporter_addr1).form-control
+          label(for="reporter_addr1")
+            | Address
+            i(data-content="Other personal info is optional and will not be publicly visible").help-simple
+          input(type="text" name="reporter_addr1" autocomplete="address-line1" value=reporter_addr1).form-control
         .form-group
-          input(type="text" name="reporter_addr2" value=reporter_addr2).form-control
+          input(type="text" name="reporter_addr2" autocomplete="address-line2" value=reporter_addr2).form-control
       .form-col.col-md-6
     .form-row
       .form-col.col-md-3
         .form-group
           label(for="reporter_city") City
-          input(type="text" name="reporter_city" autocomplete="locality" value=reporter_city).form-control
+          input(type="text" name="reporter_city" autocomplete="city" value=reporter_city).form-control
       .form-col.col-md-3
         .form-group
           label(for="reporter_state") State
-          input(type="text" name="reporter_state" autocomplete="region" value=reporter_state).form-control
+          input(type="text" name="reporter_state" autocomplete="state" value=reporter_state).form-control
       .form-col.col-md-3
         .form-group
           label(for="reporter_zip") Zip
@@ -185,4 +210,6 @@ block content
         span &nbsp;
         button(type="reset").btn.btn-secondary Reset
 
-  script(src="https://www.google.com/recaptcha/api.js" async defer)
+  block scripts
+    script(src="https://www.google.com/recaptcha/api.js" async defer)
+    script(src="/javascripts/report.js" defer)
