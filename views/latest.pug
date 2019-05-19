@@ -17,10 +17,12 @@ block content
 
   a(name='last')
   h2 Most Recent
+  - var rows = last
   include latest-table.pug
 
   a(name='most')
   h2 Top of All Time
+  - var rows = most
   include latest-table.pug
 
   p
