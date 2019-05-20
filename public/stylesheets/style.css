@@ -39,5 +39,5 @@ table.notifications td.headline {
 }
 
 .dataTables_filter {
-  float: left !important;
+  float: right !important;
 }

@@ -1,8 +1,11 @@
 {
   "name": "motorcato",
-  "version": "0.0.1",
+  "description": "MESS reports web site",
+  "version": "0.1.0",
   "author": "John Coker <john@jcsw.com> (http://johncoker.com/)",
+  "homepage": "http://www.motorcato.org",
   "license": "Unlicense",
+  "repository": "https://github.com/JohnCoker/motorcato",
   "scripts": {
     "start": "node ./bin/www"
   },

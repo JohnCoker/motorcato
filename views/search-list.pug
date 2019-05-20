@@ -3,26 +3,55 @@ extends layout
 block content
   h1= title
 
-  table.failures.table.dt-responsive
-    thead
-      tr
-        th Details
-        th Manufacturer
-        th Motor
-        th Date
-        th Type
-        th Failure
-        th Location
-    tbody
-      each row in results
+  a(name='top')
+  .table-responsive
+    table(id="results").results.table.dt-responsive
+      thead
         tr
-          td
-            a(href=row.id_search)= row.id
-          td
-            a(href=row.manufacturer_search)= row.manufacturer
-          td
-            a(href=row.motor_search)= row.common_name
-          td(data-sort=row.failure_date_iso)= row.failure_date_local
-          td= row.motor_type
-          td= row.fail_summary
-          td= row.location
+          th(data-priority=1)
+            i(title="Report details").far.fa-clipboard
+          th(data-priority=2) Manufacturer
+          th(data-priority=2) Motor
+          th(data-priority=3) Date
+          th(data-priority=4) Type
+          th(data-priority=5) Failure
+          th(data-priority=6) Location
+      tbody
+        each row in results
+          tr
+            td
+              a(href=row.id_search)
+                i(title="Report details").far.fa-clipboard
+            td
+              a(href=row.manufacturer_search)= row.manufacturer
+            td
+              a(href=row.motor_search)= row.common_name
+            td(data-sort=row.failure_date_iso)= row.failure_date_local
+            td= row.motor_type
+            td= row.fail_summary
+            td= row.location
+
+  p
+    | Showing 
+    if more
+      | #{result_count} of #{total_count}
+    else
+      | all #{result_count}
+    |  results;
+    | back up to 
+    a(href='#top') the top
+    | .
+
+block scripts
+  script(type='text/javascript')
+    | $(document).ready(function() {
+    |   $('#results').DataTable({
+    |     paging: false,
+    |     info: false,
+    |     responsive: true,
+    |     columnDefs: [
+    |       { targets: 0, orderable: false },
+    |     ],
+    |     order: [[ 3, "desc" ], [ 1, "asc" ], [ 2, "asc" ]],
+    |   });
+    | });

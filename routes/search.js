@@ -203,6 +203,7 @@ function searchPage(req, res, next, params) {
 
         props.results.push(result);
       });
+      props.result_count = props.results.length.toFixed();
       props.total_count = props.results.length.toFixed();
 
       if (props.results.length == 1) {
@@ -211,7 +212,9 @@ function searchPage(req, res, next, params) {
       } else if (props.results.length > 1) {
         if (props.results.length > LimitPlus) {
           props.results.length = Limit;
+          props.result_count = Limit.toFixed();
           props.total_count += '+';
+          props.more = true;
         }
         res.render('search-list', props);
       } else {
