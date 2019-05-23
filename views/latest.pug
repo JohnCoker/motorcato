@@ -1,6 +1,10 @@
 extends layout
 
 block content
+  style(type="text/css")
+    | .dataTables_wrapper { margin-bottom: 2em; }
+    | .dataTables_wrapper .title { display: inline-block; font-size: 1.5rem; }
+
   h1= title
   p
     | The last 
@@ -16,13 +20,13 @@ block content
     | .
 
   a(name='last')
-  h2 Most Recent
   - var rows = last
+  - var caption = "Most Recent"
   include latest-table.pug
 
   a(name='most')
-  h2 Top of All Time
   - var rows = most
+  - var caption = "Top of All Time"
   include latest-table.pug
 
   p
@@ -40,5 +44,13 @@ block scripts
     |       { type: "num", targets: 3 },
     |     ],
     |     order: [[ 2, "desc" ]],
+    |     dom: '<"title">frtip'
+    |   });
+    |   $('table.table').each((i, elt) => {
+    |     var table = $(elt);
+    |     var caption = table.find('caption').detach();
+    |     var wrapper = table.closest('.dataTables_wrapper');
+    |     console.log(wrapper);
+    |     wrapper.find('.title').append(caption.text());
     |   });
     | });

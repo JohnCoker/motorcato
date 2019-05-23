@@ -1,10 +1,11 @@
 table.failures.table.dt-responsive
+  caption= caption
   thead
     tr
-      th Manufacturer
-      th Motor
-      th Last
-      th Count
+      th(title="motor manufacturer") Manufacturer
+      th(title="common name of motor") Motor
+      th(title="most recent failure date") Last
+      th(title="number of failures reported") Count
   tbody
     each row in rows
       tr

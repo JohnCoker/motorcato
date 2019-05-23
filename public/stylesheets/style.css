@@ -26,6 +26,9 @@ footer {
   padding-top: 2pt;
   font-size: smaller;
 }
+table.table {
+  border-bottom: 3px solid #dee2e6;
+}
 
 table.notifications td {
   padding: 3pt 0;
