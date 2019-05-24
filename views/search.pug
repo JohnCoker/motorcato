@@ -8,8 +8,10 @@ block content
     | .form-row.submit { margin-top: 1em; }
     | .form-group.date { margin-bottom: 0.5em; }
 
+  each error in errors
+    div(role="alert").alert.alert-warning= error
   if searched
-    p No reports matched your search; try again with broader criteria.
+    .alert.alert-info(role="alert") No reports matched your search; try again with broader criteria.
   else
     p Search through all the submitted failure reports.
 

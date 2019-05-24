@@ -118,7 +118,7 @@ const FailureCols = [];
       if (v == 'null')
         return 'common_name is null';
       else
-        return '(common_name = ' + quoteSqlStr(v) + ' or designation like ' + quoteSqlStr('%' + v + '%') + ')';
+        return '(common_name = upper(' + quoteSqlStr(v) + ') or designation ilike ' + quoteSqlStr('%' + v + '%') + ')';
     }
   };
   SearchCols[info.col] = info;
@@ -135,6 +135,7 @@ function searchPage(req, res, next, params) {
       failure_date_compare: '>=',
     },
     results: [],
+    errors: [],
   };
 
   let keys = [], comparisons = [], byId = false;

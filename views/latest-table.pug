@@ -10,9 +10,9 @@
     tbody
       each row in rows
         tr
-          td
+          td(title="all failures for this manufacturer")
             a(href=row.manufacturer_search)= row.manufacturer
-          td
+          td(title="all failures for this motor")
             a(href=row.motor_search)= row.common_name
           td(data-sort=row.last_date_iso)= row.last_date_local
           td= row.count

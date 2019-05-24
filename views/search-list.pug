@@ -8,8 +8,8 @@ block content
     table(id="results").results.table.dt-responsive.nowrap
       thead
         tr
-          th(data-priority="9" title="view report details")
-            i(title="Report details").far.fa-clipboard
+          th(data-priority="9" title="failure report details")
+            i.far.fa-clipboard
           th(data-priority="5" title="motor manufacturer") Manufacturer
           th(data-priority="5" title="common name of motor") Motor
           th(data-priority="3" title="motor type") Type
@@ -19,14 +19,19 @@ block content
       tbody
         each row in results
           tr
-            td(title="view report details")
+            td(title="details of this failure report")
               a(href=row.id_search)
-                i(title="Report details").far.fa-clipboard
-            td
+                i.far.fa-clipboard
+            td(title="all failures for this manufacturer")
               a(href=row.manufacturer_search)= row.manufacturer
-            td
+            td(title="all failures for this motor")
               a(href=row.motor_search)= row.common_name
-            td= row.motor_type
+            td
+              if row.motor_type == "SU"
+                | single-use
+              else
+                | #{row.motor_type}
+
             td(data-sort=row.failure_date_iso)= row.failure_date_local
             td= row.fail_summary
             td= row.location
