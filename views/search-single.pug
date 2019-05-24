@@ -1,0 +1,161 @@
+extends layout
+
+block content
+  h1= title
+
+  style(type="text/css")
+    | .col.label { font-style: italic; white-space: nowrap; overflow: hidden; padding-right: 0; }
+    | .col.label.sub-label { font-style: italic; padding-left: 25px; }
+
+  a(name='top')
+  .row
+    .col.label Manufacturer
+    .col.value= result.manufacturer
+  .row
+    .col.label Designation
+    .col.value= result.designation
+  .row
+    .col.label Type
+    .col.value
+      if result.motor_type == "SU"
+        | single-use
+      else
+        | #{result.motor_type}
+      
+  if result.serial_no
+    .row
+      .col.label Date or code
+      .col.value= result.serial_no
+  if result.failure_date
+    .row
+      .col.label Failure date
+      .col.value= result.failure_date_local
+  if result.location
+    .row
+      .col.label Location
+      .col.value= result.location
+  if result.temperature
+    .row
+      .col.label Temperature
+      .col.value #{result.temperature} ℉
+  if result.fail_nozzle_blown
+    .row
+      .col.label Nozzle blown out
+      .col.value
+        i.fas.fa-check-square
+  if result.fail_ejection_blown
+    .row
+      .col.label Ejection end blown out
+      .col.value
+        i.fas.fa-check-square
+  if result.fail_casing_split
+    .row
+      .col.label Casing split
+      .col.value
+        i.fas.fa-check-square
+  if result.fail_propellant_ejected
+    .row
+      .col.label Burning propellant ejected
+      .col.value
+        i.fas.fa-check-square
+  if result.fail_burn_through
+    .row
+      .col.label Casing Burned through
+      .col.value
+        i.fas.fa-check-square
+    if result.burn_through_loc
+      .row
+        .col.label.sub-label location
+        .col.value= result.burn_through_loc
+  if result.fail_no_ejection
+    .row
+      .col.label No ejection charge
+      .col.value
+        i.fas.fa-check-square
+  if result.fail_bad_delay
+    .row
+      .col.label Delay inaccurate
+      .col.value
+        i.fas.fa-check-square
+    if result.actual_delay
+      .row
+        .col.label.sub-label actual
+        .col.value= result.actual_delay
+  if result.fail_other
+    .row
+      .col.label Other failure
+      .col.value
+        i.fas.fa-check-square
+  if result.other_desc
+    .row
+      .col.label.sub-label description
+      .col.value= result.other_desc
+  if result.reported_mfr
+    .row
+      .col.label Reported to mfr.
+      .col.value
+        i.fas.fa-check-square
+  if result.more_motors
+    .row
+      .col.label Have more motors
+      .col.value
+        i.fas.fa-check-square
+  if result.comments
+    .row
+      .col.label Comments
+      .col.value= result.comments
+  if result.reported_date
+    .row
+      .col.label Reported date
+      .col.value result.reported_date_local
+  if result.reporter_name
+    .row
+      .col.label Reporter name
+      .col.value= result.reporter_name
+  if result.reporter_addr1
+    .row
+      .col.label Reporter address
+      .col.value= result.reporter_addr1
+  if result.reporter_addr2
+    .row
+      .col.label.no-label
+      .col.value= result.reporter_addr2
+  if result.reporter_city
+    .row
+      .col.label City
+      .col.value= result.reporter_city
+  if result.reporter_state
+    .row
+      .col.label Sstate
+      .col.value= result.reporter_state
+  if result.reporter_zip
+    .row
+      .col.label ZIP
+      .col.value= result.reporter_zip
+  if result.reporter_email
+    .row
+      .col.label E-mail
+      .col.value= result.reporter_email
+  if result.reporter_phone
+    .row
+      .col.label Telephone
+      .col.value= result.reporter_phone
+  if result.reporter_nar
+    .row
+      .col.label NAR #
+      .col.value= result.reporter_nar
+  if result.reporter_car
+    .row
+      .col.label CAR #
+      .col.value= result.reporter_car
+  if result.reporter_tra
+    .row
+      .col.label TRA #
+      .col.value= result.reporter_tra
+  if result.reporter_ukra
+    .row
+      .col.label UKRA #
+      .col.value= result.reporter_ukra
+
+  block scripts
+    script(src="/javascripts/search.js" defer)

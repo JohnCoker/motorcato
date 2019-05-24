@@ -5,17 +5,17 @@ block content
 
   a(name='top')
   .table-responsive
-    table(id="results").results.table.dt-responsive
+    table(id="results").results.table.table-sm.dt-responsive
       thead
         tr
-          th(data-priority=1)
+          th(data-priority="9")
             i(title="Report details").far.fa-clipboard
-          th(data-priority=2) Manufacturer
-          th(data-priority=2) Motor
-          th(data-priority=3) Date
-          th(data-priority=4) Type
-          th(data-priority=5) Failure
-          th(data-priority=6) Location
+          th(data-priority="5") Manufacturer
+          th(data-priority="5") Motor
+          th(data-priority="4") Date
+          th(data-priority="3") Type
+          th(data-priority="2") Failure
+          th(data-priority="1") Location
       tbody
         each row in results
           tr

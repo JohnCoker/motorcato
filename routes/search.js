@@ -1,12 +1,11 @@
 const express = require('express'),
       router = express.Router(),
       moment = require('moment'),
-      escape = require('escape-html'),
+      quoteSqlStr = require('./util.js').quoteSqlStr,
       searchURL = require('./util.js').searchURL,
       formatDateISO = require('./util.js').formatDateISO,
-      formatDateLocal = require('./util.js').formatDateLocal;
-
-const SearchTitle = 'Search Reports';
+      formatDateLocal = require('./util.js').formatDateLocal,
+      loadMfrNames = require('./util.js').loadMfrNames;
 
 const SearchCols = {};
 const FailureCols = [];
@@ -94,56 +93,100 @@ const FailureCols = [];
     FailureCols.push(info);
 });
 (function() {
-  let sql = "(";
-  FailureCols.forEach((info, i) => {
-    if (i > 0)
-      sql += " and ";
-    sql += " not " + info.col;
-  });
-  sql += ")";
   let info = {
     col: "fail_unknown",
     type: "bool",
-    sql: sql,
+    sql: v => {
+      let sql = "(";
+      FailureCols.forEach((info, i) => {
+        if (i > 0)
+          sql += " and ";
+        sql += " not " + info.col;
+      });
+      sql += ")";
+      return sql;
+    }
   };
+  SearchCols[info.col] = info;
+
+  info = {
+    col: "name",
+    type: "bool",
+    sql: v => {
+      if (v == null || v === '')
+        return;
+      if (v == 'null')
+        return 'common_name is null';
+      else
+        return '(common_name = ' + quoteSqlStr(v) + ' or designation like ' + quoteSqlStr('%' + v + '%') + ')';
+    }
+  };
+  SearchCols[info.col] = info;
 })();
 
 const Limit = 50;
 const LimitPlus = Limit + Math.ceil(Limit / 10);
 
 function searchPage(req, res, next, params) {
+  let props = {
+    title: 'Search Reports',
+    searched: false,
+    criteria: {
+      failure_date_compare: '>=',
+    },
+    results: [],
+  };
+
   let keys = [], comparisons = [], byId = false;
-  console.log('params:');
-  console.log(params);
   if (params != null) {
+
+    function compareOp(key) {
+      let op = params[key + '_compare'];
+      if (op == null || op === '' || !/^[<>]?=?$/.test(op))
+        op = "=";
+      return op;
+    }
+
     keys = Object.keys(params);
     keys.forEach(key => {
       let info = SearchCols[key];
       if (info) {
+        let value = params[key];
         if (info.sql) {
-          comparisons.push(info.sql);
-        } else if (params[key] == "null") {
-          comparisons.push(info.col + " is null");
-        } else {
-          let value;
-          if (info.type == 'date') {
-            value = moment(params[key], 'YYYY-M-D', true);
-            if (value.isValid())
-              comparisons.push(info.col + " = '" + moment.format("YYYY-MM-DD") + "'");
-          } else if (info.type == 'int') {
-            value = parseInt(params[key]);
-            if (!isNaN(value))
-              comparisons.push(info.col + " = " + value.toFixed());
-          } else if (info.type == 'bool') {
-            if (params[key] === 'false')
-              comparisons.push("not " + info.col);
-            else
-              comparisons.push(info.col);
-          } else {
-            value = params[key];
-            if (typeof value != null)
-              comparisons.push(info.col + " = '" + value.replace(/'/g, "''") + "'");
+          let sql = info.sql(value);
+          if (sql) {
+            comparisons.push(sql);
+            props.criteria[key] = value;
           }
+        } else if (value == 'null') {
+          comparisons.push(info.col + " is null");
+          props.criteria[key] = 'null';
+        } else if (info.type == 'date') {
+          value = moment(value, 'YYYY-M-D', true);
+          if (value.isValid()) {
+            let compare = compareOp(key);
+            comparisons.push(info.col + " " + compare + " '" + value.format("YYYY-MM-DD") + "'");
+            props.criteria[key] = value;
+            props.criteria[key + '_compare'] = compare;
+          }
+        } else if (info.type == 'int') {
+          value = parseInt(value);
+          if (!isNaN(value)) {
+            let compare = compareOp(key);
+            comparisons.push(info.col + " " + compare + " " + value.toFixed());
+            props.criteria[key] = value;
+            props.criteria[key + '_compare'] = compare;
+          }
+        } else if (info.type == 'bool') {
+          if (value === 'false')
+            comparisons.push("not " + info.col);
+          else {
+            comparisons.push(info.col);
+            props.criteria[key] = true;
+          }
+        } else if (value != null && value !== '') {
+          comparisons.push(info.col + " = " + quoteSqlStr(value));
+          props.criteria[key] = value;
         }
         if (info.id)
           byId = true;
@@ -151,25 +194,20 @@ function searchPage(req, res, next, params) {
     });
   }
 
-  let props = {
-    title: SearchTitle,
-    searched: false,
-    results: [],
-  };
   if (comparisons.length > 0) {
-    if (!byId && keys.indexOf('rejected') < 0)
-      comparisons.push("not rejected");
     let fails = comparisons.filter(sql => /^fail_/.test(sql));
     if (fails.length > 1) {
       comparisons = comparisons.filter(sql => !/^fail_/.test(sql));
       comparisons.push("(" + fails.join(" or ") + ")");
     }
+    if (!byId && keys.indexOf('rejected') < 0)
+      comparisons.push("not rejected");
 
+    let where = "\n where " + comparisons.join("\n       and ");
     let select = ("select * from reports" +
-                  "\n where " + comparisons.join("\n       and ") +
+                  where +
                   "\n order by failure_date desc, manufacturer, common_name" +
                   "\n limit " + (LimitPlus + 1).toFixed());
-    console.log(select);
     req.pool.query(select, (err, q) => {
       if (err)
         return next(err);
@@ -185,6 +223,10 @@ function searchPage(req, res, next, params) {
           if (col == 'failure_date') {
             result.failure_date_iso = formatDateISO(r.failure_date);
             result.failure_date_local = formatDateLocal(req, r.failure_date);
+          }
+          if (col == 'reported_date') {
+            result.reported_date_iso = formatDateISO(r.reported_date);
+            result.reported_date_local = formatDateLocal(req, r.reported_date);
           }
           result.id_search = searchURL({ id: r.id });
           result.manufacturer_search = searchURL({ manufacturer: r.manufacturer });
@@ -207,22 +249,37 @@ function searchPage(req, res, next, params) {
       props.total_count = props.results.length.toFixed();
 
       if (props.results.length == 1) {
+        props.title = 'Search Result';
         props.result = props.results[0];
         res.render('search-single', props);
       } else if (props.results.length > 1) {
+        props.title = 'Search Results';
         if (props.results.length > LimitPlus) {
           props.results.length = Limit;
           props.result_count = Limit.toFixed();
           props.total_count += '+';
           props.more = true;
-        }
-        res.render('search-list', props);
+
+          let count = "select count(*) from reports" + where;
+          req.pool.query(count, (err, q) => {
+            if (!err)
+              props.total_count = q.rows[0].count;
+            res.render('search-list', props);
+          });
+        } else
+          res.render('search-list', props);
       } else {
-        res.render('search', props);
+        loadMfrNames().then(list => {
+          props.manufacturers = list;
+          res.render('search', props);
+        }).catch(e => next(e));
       }
     });
   } else {
-    res.render('search', props);
+    loadMfrNames().then(list => {
+      props.manufacturers = list;
+      res.render('search', props);
+    }).catch(e => next(e));
   }
 }
 

@@ -2,3 +2,95 @@ extends layout
 
 block content
   h1= title
+
+  style(type="text/css")
+    | .form-check { margin-bottom: 0.5em; }
+    | .form-row.submit { margin-top: 1em; }
+    | .form-group.date { margin-bottom: 0.5em; }
+
+  if searched
+    p No reports matched your search; try again with broader criteria.
+  else
+    p Search through all the submitted failure reports.
+
+  form(method="post", action="/search").report
+    .form-row
+      .form-col.col-md-4
+        .form-group
+          label(for="manufacturer") Manufacturer
+          select(name="manufacturer").form-control
+            option(value="") (all)
+            each mfr in manufacturers
+              option(selected=(criteria.manufacturer == mfr))= mfr
+      .form-col.col-md-4
+        .form-group
+          label(for="name") Designation
+          input(type="text", name="name" value=criteria.name).form-control
+      .form-col.col-md-4
+        .form-group
+          label(for="motor_type") Type
+          select(name="motor_type").form-control
+            option(value="") (all)
+            option(value="SU" selected=(criteria.type == 'SU')) single-use
+            option(selected=(criteria.type == 'reload')) reload
+            option(selected=(criteria.type == 'hybrid')) hybrid
+
+    .form-row
+      .form-col.col.col-md-4
+        .form-group.date
+          label(for="failure_date") Failure date
+          input(type="date" name="failure_date" value=criteria.failure_date).form-control
+        .form-group
+          .form-check-inline
+            input(type="radio" name="failure_date_compare" value="<=" checked=(criteria.failure_date_compare == '<=')).form-check-input
+            label(for="failure_date_compare").form-check-label Before
+          .form-check-inline
+            input(type="radio" name="failure_date_compare" value="=" checked=(criteria.failure_date_compare == '=')).form-check-input
+            label(for="failure_date_compare").form-check-label Only on
+          .form-check-inline
+            input(type="radio" name="failure_date_compare" value=">=" checked=(criteria.failure_date_compare == '>=')).form-check-input
+            label(for="failure_date_compare").form-check-label Since
+
+    .form-row
+      .form-col.col
+        label Failure
+    .form-row
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_nozzle_blown" checked=criteria.fail_nozzle_blown).form-check-input
+          label(for="fail_nozzle_blown").form-check-label Nozzle blown out
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_ejection_blown" checked=criteria.fail_ejection_blown).form-check-input
+          label(for="fail_ejection_blown").form-check-label Ejection end blown out
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_casing_split" checked=criteria.fail_casing_split).form-check-input
+          label(for="fail_casing_split").form-check-label Casing split
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_propellant_ejected" checked=criteria.fail_propellant_ejected).form-check-input
+          label(for="fail_propellant_ejected").form-check-label Burning propellant ejected
+    .form-row
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_burn_through" checked=criteria.fail_burn_through).form-check-input
+          label(for="fail_burn_through").form-check-label Casing burned through
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_no_ejection" checked=criteria.fail_no_ejection).form-check-input
+          label(for="fail_no_ejection").form-check-label No ejection charge
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_bad_delay" checked=criteria.fail_bad_delay).form-check-input
+          label(for="fail_bad_delay").form-check-label Delay inaccurate
+      .form-col.col-md-3
+        .form-check
+          input(type="checkbox" name="fail_other" checked=criteria.fail_other).form-check-input
+          label(for="fail_other").form-check-label Other failure
+
+    .form-row.submit
+      .form-col.col
+        button(type="submit").btn.btn-primary Submit
+        span &nbsp;
+        button(type="reset").btn.btn-secondary Reset

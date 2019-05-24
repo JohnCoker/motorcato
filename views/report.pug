@@ -24,31 +24,37 @@ block content
         h2 Engine Data
         p This data is about the motor and is all required.
     .form-row
-      .form-col.col-md-4
+      .form-col.col-md-3
         .form-group
           label(for="manufacturer")
             | Manufacturer
             i(data-content="The maker of the motor (engine)").help-simple
           select(name="manufacturer" required="true").form-control
-            option(val="", disabled="true" hidden="true" selected="true") (select)
+            option(value="", disabled="true" hidden="true" selected="true") (select)
             each mfr in manufacturers
               option= mfr
-      .form-col.col-md-4
+      .form-col.col-md-3
         .form-group
           label(for="designation")
             | Designation
             i(data-content="The official name of the motor (engine)").help-simple
           input(type="text", name="designation" placeholder="C6-5" required="true" value=designation).form-control
-      .form-col.col-md-4
+      .form-col.col-md-3
         .form-group
           label(for="motor_type")
             | Type
             i(data-content="What type of motor it is. If unsure, probably 'single-use'").help-simple
           select(name="motor_type" required="true").form-control
-            option(val="", disabled="true" hidden="true" selected="true") (select)
-            option(val="SU") single-use
+            option(value="", disabled="true" hidden="true" selected="true") (select)
+            option(value="SU") single-use
             option reload
             option hybrid
+      .form-col.col-md-3
+        .form-group
+          label(for="serial_no")
+            | Date or code
+            i(data-content="Manufacturing date or other code on casing").help-simple
+          input(type="text", name="serial_no" placeholder="10T6" value=serial_no).form-control
 
     .form-row.section
       .form-col
