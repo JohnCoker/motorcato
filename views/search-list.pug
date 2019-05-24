@@ -5,29 +5,29 @@ block content
 
   a(name='top')
   .table-responsive
-    table(id="results").results.table.table-sm.dt-responsive
+    table(id="results").results.table.dt-responsive.nowrap
       thead
         tr
-          th(data-priority="9")
+          th(data-priority="9" title="view report details")
             i(title="Report details").far.fa-clipboard
-          th(data-priority="5") Manufacturer
-          th(data-priority="5") Motor
-          th(data-priority="4") Date
-          th(data-priority="3") Type
-          th(data-priority="2") Failure
-          th(data-priority="1") Location
+          th(data-priority="5" title="motor manufacturer") Manufacturer
+          th(data-priority="5" title="common name of motor") Motor
+          th(data-priority="3" title="motor type") Type
+          th(data-priority="4" title="date of reported failure") Date
+          th(data-priority="2" title="failure modes reported") Failure
+          th(data-priority="1" title="geographic location motor was used") Location
       tbody
         each row in results
           tr
-            td
+            td(title="view report details")
               a(href=row.id_search)
                 i(title="Report details").far.fa-clipboard
             td
               a(href=row.manufacturer_search)= row.manufacturer
             td
               a(href=row.motor_search)= row.common_name
-            td(data-sort=row.failure_date_iso)= row.failure_date_local
             td= row.motor_type
+            td(data-sort=row.failure_date_iso)= row.failure_date_local
             td= row.fail_summary
             td= row.location
 

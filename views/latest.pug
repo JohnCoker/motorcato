@@ -40,8 +40,9 @@ block scripts
     |   $('table.table').DataTable({
     |     paging: false,
     |     info: false,
+    |     responsive: true,
     |     columnDefs: [
-    |       { type: "num", targets: 3 },
+    |       { targets: 3, type: "num", className: "text-right" },
     |     ],
     |     order: [[ 2, "desc" ]],
     |     dom: '<"title">frtip'

@@ -1,17 +1,18 @@
-table.failures.table.dt-responsive
-  caption= caption
-  thead
-    tr
-      th(title="motor manufacturer") Manufacturer
-      th(title="common name of motor") Motor
-      th(title="most recent failure date") Last
-      th(title="number of failures reported") Count
-  tbody
-    each row in rows
+.table-responsive
+  table.failures.table.dt-responsive.nowrap
+    caption= caption
+    thead
       tr
-        td
-          a(href=row.manufacturer_search)= row.manufacturer
-        td
-          a(href=row.motor_search)= row.common_name
-        td(data-sort=row.last_date_iso)= row.last_date_local
-        td= row.count
+        th(data-priority="9" title="motor manufacturer") Manufacturer
+        th(data-priority="9" title="common name of motor") Motor
+        th(data-priority="1" title="most recent failure date") Last
+        th(data-priority="2" title="number of failures reported") Count
+    tbody
+      each row in rows
+        tr
+          td
+            a(href=row.manufacturer_search)= row.manufacturer
+          td
+            a(href=row.motor_search)= row.common_name
+          td(data-sort=row.last_date_iso)= row.last_date_local
+          td= row.count
