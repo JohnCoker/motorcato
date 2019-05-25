@@ -37,7 +37,6 @@ $(document).ready(e => {
                     let icon = this;
                     $(this).popover("show");
                     $(".popover").on("mouseleave", function () {
-                      console.log("leave");
                       $(icon).popover('hide');
                     });
                   }).on("mouseleave", function () {
