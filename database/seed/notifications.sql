@@ -20,7 +20,7 @@ AeroTech is continuing to examine and evaluate the situation and is actively wor
 ');
 
 insert into notifications (date, headline, posted_by, url)
-values ('2016-06-15', 'Cesaroni Pro38 Bulletin', 1,
+values ('2016-06-15', 'Cesaroni Bulletin: Forward Closure', 1,
  '/documents/2016-Bulletin-Pro38-Forward-Closure.pdf')
 ;
 
@@ -52,3 +52,9 @@ Thank you for your orders and continued representation of the AeroTech products.
 Customer Service
 RCS Rocket Motor Components, Inc.
 AeroTech, ISP & Quest Divisions');
+
+insert into notifications (date, headline, posted_by, url)
+values ('2019-04-15', 'Cesaroni Bulletin: 1G Failures', 1,
+ '/documents/Bulletin_Pro38_1G_Pellet_Issue_v1.2.pdf')
+;
+
