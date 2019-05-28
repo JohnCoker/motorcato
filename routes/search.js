@@ -140,14 +140,12 @@ function searchPage(req, res, next, params) {
 
   let keys = [], comparisons = [], byId = false;
   if (params != null) {
-
     function compareOp(key) {
       let op = params[key + '_compare'];
       if (op == null || op === '' || !/^[<>]?=?$/.test(op))
         op = "=";
       return op;
     }
-
     keys = Object.keys(params);
     keys.forEach(key => {
       let info = SearchCols[key];
@@ -284,7 +282,7 @@ function searchPage(req, res, next, params) {
   }
 }
 
-router.get('/search', function(req, res, next) {
+router.get(['/search', '/search.html'], function(req, res, next) {
   searchPage(req, res, next, req.query);
 });
 router.post('/search', function(req, res, next) {

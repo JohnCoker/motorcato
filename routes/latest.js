@@ -25,7 +25,7 @@ const MostFailuresQuery = `${LatestSelect}
  limit 25
 `;
 
-router.get('/latest', function(req, res, next) {
+router.get(['/latest', '/latest.html'], function(req, res, next) {
   let props = {
     title: 'Latest Reports'
   };

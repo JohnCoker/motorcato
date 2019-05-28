@@ -17,7 +17,7 @@ function reportProps() {
     }).catch(e => reject(e));
   });
 }
-router.get('/report', function(req, res, next) {
+router.get(['/report', '/report.html'], function(req, res, next) {
   reportProps().then(props => res.render('report', props))
                .catch(err => next(err));
   

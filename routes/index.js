@@ -4,7 +4,7 @@ const express = require('express'),
       escape = require('escape-html'),
       MarkdownIt = require('markdown-it');
 
-router.get('/', function(req, res, next) {
+router.get(['/', 'index.html'], function(req, res, next) {
   // load info on notifications
   req.pool.query('select id, date, url, headline from notifications where not expired order by date desc', (err, q) => {
     if (err)
@@ -32,6 +32,8 @@ router.get('/', function(req, res, next) {
 
 router.get('/notification/:id', function(req, res, next) {
   // load single notification
+  if (req.params.id == null || !/^\d+$/.test(req.params.id))
+    return next();
   req.pool.query('select * from notifications where id = $1', [req.params.id], (err, q) => {
     if (err)
       return next(err);
