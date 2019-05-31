@@ -2,7 +2,9 @@ create table admins (
   id serial primary key,
   email text unique not null,
   passwd text not null,
-  enabled boolean not null default true
+  enabled boolean not null default true,
+  reset_token text,
+  reset_expires timestamp
 );
 create table notifications (
   id serial primary key,

@@ -135,7 +135,10 @@ block content
   if result.reporter_email
     .row
       .col.label E-mail
-      .col.value= result.reporter_email
+      .col.value
+        | #{result.reporter_email} 
+        a(href=('mailto:' + result.reporter_email))
+          i.fas.fa-envelope
   if result.reporter_phone
     .row
       .col.label Telephone

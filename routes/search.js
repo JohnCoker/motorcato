@@ -136,6 +136,7 @@ function searchPage(req, res, next, params) {
     },
     results: [],
     errors: [],
+    admin: req.session && req.session.authenticated || false,
   };
 
   let keys = [], comparisons = [], byId = false;
@@ -215,7 +216,7 @@ function searchPage(req, res, next, params) {
       q.rows.map(r => {
         let result = {};
         Object.keys(r).forEach(col => {
-          if (/^reporter_/.test(col))
+          if (/^reporter_/.test(col) && !props.admin)
             return;
 
           result[col] = r[col];

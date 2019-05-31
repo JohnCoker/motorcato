@@ -10,9 +10,12 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "@sendgrid/mail": "^6.4.0",
+    "bcrypt": "^3.0.6",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "express": "~4.16.0",
+    "express-session": "^1.16.1",
     "http-errors": "~1.6.2",
     "markdown-it": "^8.4.2",
     "moment": "^2.24.0",

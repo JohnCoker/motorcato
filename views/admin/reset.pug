@@ -1,0 +1,32 @@
+extends layout
+
+block content
+  h1= title
+
+  each error in errors
+    div(role="alert").alert.alert-warning= error
+  p Please enter your new password twice.
+          
+  form(method="post", action="/admin/reset")
+    input(type="hidden" name="token" value=token)
+    .form-row
+      .form-col.col.col-md-2
+        .form-group
+          label(for="email") E-mail address
+          input(type="email" name="email" readonly value=email).form-control.form-control-plaintext
+    .form-row
+      .form-col.col.col-md-2
+        .form-group
+          label(for="password1") Password
+          input(type="password" name="password1" required autocomplete="new-password").form-control
+    .form-row
+      .form-col.col.col-md-2
+        .form-group
+          label(for="password2") Password (again)
+          input(type="password" name="password2" required autocomplete="new-password").form-control
+    .form-row
+      .form-col.col.col-md-2
+        .form-group
+          button(type="submit").btn.btn-primary Update
+          span &nbsp;
+          a(href="/admin/login").btn.btn-secondary Login

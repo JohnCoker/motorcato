@@ -27,6 +27,7 @@ html(lang="en")
         a.p-2.text-dark(href='/report') Report
         a.p-2.text-dark(href='/latest') Latest
         a.p-2.text-dark(href='/search') Search
+        block nav
 
     block content
 
@@ -38,7 +39,11 @@ html(lang="en")
     script(src='/javascripts/main.js')
     block scripts
 
+    block footer
     footer
       p.float-right site by 
         a(href="mailto:john@jcsw.com") John Coker
-      p Malfunctioning Engine Statistical Survey &bullet; PO Box 407 &bullet; Marion, IA 52302
+      p
+        | Malfunctioning Engine Statistical Survey
+        br
+        | PO Box 407 &bullet; Marion, IA 52302
