@@ -8,6 +8,9 @@ const express = require('express'),
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+/*
+ * Login required for all admin pages, except login and forgotten password pages.
+ */
 function loginProps(req, from) {
   let props = {
     title: 'Administrator Login',
@@ -80,6 +83,11 @@ router.post('/login', function(req, res, next) {
   }
 });
 
+/*
+ * Password reset flow:
+ * /admin/forgot
+ * /admin/reset
+ */
 function forgotProps(req) {
   return {
     title: 'Forgot Password',
@@ -231,6 +239,24 @@ router.post('/reset', function(req, res, next) {
       });
     }
   });
+});
+
+/*
+ * Reject a failure report
+ */
+router.get('/reject', function(req, res, next) {
+  let id = req.query.id;
+  if (id == null || id === '' || !/^\d+$/.test(id)) {
+    res.redirect(302, "/search?notfound");
+  } else {
+    let update = "update reports set rejected = true where id = " + id;
+    req.pool.query(update, (err, q) => {
+      if (err)
+        return next(err);
+
+      res.redirect(302, "/search?id=" + id);
+    });
+  }
 });
 
 module.exports = router;

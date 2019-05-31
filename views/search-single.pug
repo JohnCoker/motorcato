@@ -160,5 +160,15 @@ block content
       .col.label UKRA #
       .col.value= result.reporter_ukra
 
+  if result.rejected
+    .row
+      .col.label Rejected
+      .col.value
+        i.fas.fa-check-square
+  else if admin
+    .row
+      .col
+        a(href=('/admin/reject?id=' + result.id)).btn.btn-warning Reject Report
+
   block scripts
     script(src="/javascripts/search.js" defer)
