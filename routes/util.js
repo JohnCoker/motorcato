@@ -72,13 +72,9 @@ function loadMfrNames() {
 }
 
 function originURL(req) {
-  let protocol = req.protocol || 'http',
-      host = req.get('host') || 'localhost',
-      port = req.get('port') || 80;
-  let url = protocol + '://' + host;
-  if (port != 80 && port != 443)
-    url += ':' + port.toFixed();
-  return url;      
+  let host = req.headers['X-Forwarded-Host'] || req.get('host') || 'localhost',
+      protocol = /^localhost/.test(host) ? 'http' : 'https';
+  return protocol + '://' + host;
 }
 
 module.exports = {

@@ -1,0 +1,182 @@
+extends layout
+
+block content
+  h1= title
+  style(type="text/css")
+    | .example { padding-left: 1em; margin-bottom: 1em; }
+    | .result { width: 100%; height: 125px; overflow: scroll; padding: 0.4em 0.2em; margin-bottom: 0; }
+    | .form-group:last-child { margin-bottom: 0.5em; }
+    | .form-group input[type=submit] { margin-top: 0.2em; }
+    | .spinner { font-size: 16pt; text-align: center; }
+
+  p
+    | This site is used to collect and make available reports of hobby rocket motor failures.
+    |  Please help us all by reporting your failures here, and we can all see the results.
+
+  p
+    | For more details about the implementation of the site, the code is freely available 
+    a(href="https://github.com/JohnCoker/motorcato") on GitHub
+    | .
+
+  a(name="api")
+  h2 API
+  p
+    | There is a simple API that can be used from other sites to get a summary of failure reports for a motor.
+    |  For example, it is used by 
+    a(href="http://thrustcurve.org") ThrustCurve.org
+    |  to link to failures here from a motor info page there.
+  p
+    | You can use the GET or POST methods. For GET, the request parameters are specified in the query string.
+    |  for POST, the body must be a 
+    a(href="https://www.jsonrpc.org/specification") JSON RPC 
+    i request object
+    | . The response is always a JSON RPC 
+    i response object
+    | . The method name in the envelope is required if the base URL is used (
+    code /api/1
+    | ), otherwise the final component of the path indicates the method (
+    code /api/1/motor
+    | ).
+  p
+    | For POST methods, don't forget to specify that the body is JSON using the request header: 
+    code Content-Type: application/json
+    | .
+
+  a(name="api-manufacturers")
+  h3 Manufacturers
+  p
+    | This method gets summaries of failure reports by manufacturer (all motors).
+    | For each manufacturer, it includes the official name, the total number of reports and the date of the last report.
+    | Manufacturers for which no failures have been reported are not included.
+  p It takes no request parameters.
+
+  .example.get
+    form
+      .form-row
+        .form-col.col-md-6
+          .form-group
+            label(for="request").method GET
+            input(type="text" name="request" value=(apiURL + '/manufacturers')).form-control
+            input(type="submit" value="Try It").btn.btn-primary
+      .form-row
+        .form-col.col-md-6
+          .form-group
+            pre.result
+
+  .example.post
+    form
+      .form-row
+        .form-col.col-md-6
+          .form-group
+            label(for="request").method
+              | POST 
+              code #{apiURL}
+            textarea(name="request").form-control
+              | { "jsonrpc": "2.0", "method": "manufacturers" }
+            input(type="submit" value="Try It").btn.btn-primary
+      .form-row
+        .form-col.col-md-6
+          .form-group
+            pre.result
+
+  a(name="api-motor")
+  h3 Motor
+  p
+    | This method gets a summary of failure reports for a single motor.
+    | It returns the manufacturer official name and motor common name, the total number of reports
+    | and the date of the last report.
+  p It takes two request parameters, and both are required:
+    ul
+      li
+        code manufacturer
+        |  The official name of the manufacturer as shown on the site ("AeroTech").
+      li
+        code motor
+        |  The common name of the motor ("G80").
+
+  .example.get
+    form
+      .form-row
+        .form-col.col-md-6
+          .form-group
+            label(for="request").method GET
+            input(type="text" name="request" value=(apiURL + '/motor?manufacturer=AeroTech&motor=G80')).form-control
+            input(type="submit" value="Try It").btn.btn-primary
+      .form-row
+        .form-col.col-md-6
+          .form-group
+            pre.result
+
+  .example.post
+    form
+      .form-row
+        .form-col.col-md-6
+          .form-group
+            label(for="request").method
+              | POST 
+              code #{apiURL}
+            textarea(name="request").form-control
+              | { "jsonrpc": "2.0", "method": "motor", "params": { "manufacturer": "AeroTech", "motor": "G80" } }
+            input(type="submit" value="Try It").btn.btn-primary
+      .form-row
+        .form-col.col-md-6
+          .form-group
+            pre.result
+
+block scripts
+  script(type="text/javascript")
+    | $(document).ready(() => {
+    |   $('.result').addClass('border border-secondary rounded');
+    |   $('.example').addClass('border-left border-primary');
+    |   $('.example').each((i, e) => {
+    |     let div = $(e);
+    |     let post = div.hasClass('post');
+    |     div.find('form').submit(e => {
+    |       e.preventDefault();
+    |       let method, url, data;
+    |       if (post) {
+    |         method = 'POST';
+    |         url = '#{apiURL}';
+    |         data = div.find('textarea').val();
+    |       } else {
+    |         method = 'GET';
+    |         url = div.find('input[name=request]').val();
+    |       }
+    |       div.find('pre.result')
+    |          .removeClass('border-danger border-warning border-success')
+    |          .html('<p class="spinner"><i class="fas fa-spinner fa-spin"></i></p>');
+    |       $.ajax({
+    |         url: url,
+    |         type: method,
+    |         data: data,
+    |         contentType: 'application/json',
+    |         success: function(response) {
+    |           let text, status;
+    |           if (response != null && typeof response == 'object' && response.hasOwnProperty("jsonrpc")) {
+    |             text = JSON.stringify(response, undefined, 2);
+    |             status = response.hasOwnProperty('error') ? 'warning' : 'success';
+    |           } else {
+    |             text = String(response);
+    |             if (text.length > 150)
+    |               text = text.substring(0, 100) + '...';
+    |             status = 'danger';
+    |           }
+    |           div.find('pre.result')
+    |              .addClass('border-' + status)
+    |              .text(text);
+    |         },
+    |         error: function(response) {
+    |           let status = response.status || 400;
+    |           let text;
+    |           if (response.responseJSON)
+    |             text = JSON.stringify(response.responseJSON, undefined, 2);
+    |           else
+    |             text = status + ' ' + response.statusText;
+    |           div.find('.result')
+    |              .addClass('border-danger')
+    |              .text(text);
+    |         },
+    |       });
+    |     });
+    |   });
+    | });

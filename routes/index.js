@@ -2,7 +2,8 @@ const express = require('express'),
       router = express.Router(),
       moment = require('moment'),
       escape = require('escape-html'),
-      MarkdownIt = require('markdown-it');
+      MarkdownIt = require('markdown-it'),
+      originURL = require('./util.js').originURL;
 
 router.get(['/', 'index.html'], function(req, res, next) {
   // load info on notifications
@@ -58,6 +59,13 @@ router.get('/notification/:id', function(req, res, next) {
       title: row.headline,
       body: body
     });
+  });
+});
+
+router.get(['/about', '/about.html' ], function(req, res, next) {
+  res.render('about', {
+    title: 'About This Site',
+    apiURL: originURL(req) + '/api/1',
   });
 });
 
