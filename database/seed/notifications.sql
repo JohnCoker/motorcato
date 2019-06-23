@@ -19,9 +19,12 @@ https://youtu.be/qii-t7RbpMk
 AeroTech is continuing to examine and evaluate the situation and is actively working on a solution that we believe will conclusively solve the problem in the near future. Until then, new production 54mm DMS motors will be shipped without thrust rings and customers will need to apply their own tape thrust rings or use a motor block per steps 3 or 4 above. We are sorry for any inconvenience this may have caused for our dealers and customers. Your understanding and patience is appreciated, and we thank you for your continued support.
 ');
 
-insert into notifications (date, headline, posted_by, url)
-values ('2016-06-15', 'Cesaroni Bulletin: Forward Closure', 1,
- '/documents/2016-Bulletin-Pro38-Forward-Closure.pdf')
+\lo_import '2016-Bulletin-Pro38-Forward-Closure.pdf' '2016-Bulletin-Pro38-Forward-Closure.pdf'
+insert into documents (filename, content_type, uploaded_by, content_oid)
+values ('2016-Bulletin-Pro38-Forward-Closure.pdf', 'application/pdf', 1, :LASTOID)
+;
+insert into notifications (date, headline, posted_by, document_name)
+values ('2016-06-15', 'Cesaroni Bulletin: Forward Closure', 1, '2016-Bulletin-Pro38-Forward-Closure.pdf')
 ;
 
 insert into notifications (date, headline, posted_by, body)
@@ -53,8 +56,10 @@ Customer Service
 RCS Rocket Motor Components, Inc.
 AeroTech, ISP & Quest Divisions');
 
-insert into notifications (date, headline, posted_by, url)
-values ('2019-04-15', 'Cesaroni Bulletin: 1G Failures', 1,
- '/documents/Bulletin_Pro38_1G_Pellet_Issue_v1.2.pdf')
+\lo_import 'Bulletin_Pro38_1G_Pellet_Issue_v1.2.pdf' 'Bulletin_Pro38_1G_Pellet_Issue_v1.2.pdf'
+insert into documents (filename, content_type, uploaded_by, content_oid)
+values ('Bulletin_Pro38_1G_Pellet_Issue_v1.2.pdf', 'application/pdf', 1, :LASTOID)
 ;
-
+insert into notifications (date, headline, posted_by, document_name)
+values ('2019-04-15', 'Cesaroni Bulletin: 1G Failures', 1, 'Bulletin_Pro38_1G_Pellet_Issue_v1.2.pdf')
+;

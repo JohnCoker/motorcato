@@ -6,10 +6,18 @@ create table admins (
   reset_token text,
   reset_expires timestamp
 );
+create table documents (
+  id serial primary key,
+  filename text unique not null,
+  content_type text,
+  content_oid oid not null,
+  uploaded_by integer not null references admins
+);
 create table notifications (
   id serial primary key,
   date date not null,
   headline text not null,
+  document_name text references documents(filename),
   url text,
   body text,
   posted_by integer not null references admins,
