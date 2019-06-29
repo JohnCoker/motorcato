@@ -1,10 +1,11 @@
 const express = require('express'),
       router = express.Router(),
-      moment = require('moment'),
       escape = require('escape-html'),
       MarkdownIt = require('markdown-it'),
       { LargeObjectManager } = require('pg-large-object'),
-      originURL = require('./util.js').originURL;
+      originURL = require('./util.js').originURL,
+      formatDateISO = require('./util.js').formatDateISO,
+      formatDateLocal = require('./util.js').formatDateLocal;
 
 router.get(['/', 'index.html'], function(req, res, next) {
   // load info on notifications
@@ -26,8 +27,8 @@ router.get(['/', 'index.html'], function(req, res, next) {
         url = '/notification/' + r.id;
       props.notifications.push({
         id: r.id,
-        date: r.date,
-        dateStr: moment(r.date).format('MMM D, YYYY'),
+        date_iso: formatDateISO(r.date),
+        date_local: formatDateLocal(req, r.date),
         headline: r.headline,
         url: url,
       });

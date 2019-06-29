@@ -2,6 +2,18 @@ const moment = require('moment'),
       http = require('http'),
       xml2js = require('xml2js');
 
+function isEmpty(v) {
+  return v == null || v === '' || v.trim() === '';
+}
+
+function nonEmpty(v) {
+  if (v == null)
+    return;
+  v = v.trim();
+  if (v !== '')
+    return v;
+}
+
 function quoteSqlStr(v) {
   if (v == null)
     return 'null';
@@ -77,11 +89,32 @@ function originURL(req) {
   return protocol + '://' + host;
 }
 
+function rowId(id) {
+  if (id == null || !/^\d+$/.test(id))
+    return -1;
+  return id;
+}
+
+function formatSize(size) {
+  if (typeof size != 'number' || !isFinite(size) || size < 0)
+    return '';
+  if (size >= 1024.5 * 1024)
+    return (size / 1024 / 1024).toFixed() + 'Mb';
+  if (size >= 1024.5)
+    return (size / 1024).toFixed() + 'Kb';
+  else
+    return size.toFixed() + 'b';
+}
+
 module.exports = {
+  isEmpty: isEmpty,
+  nonEmpty: nonEmpty,
   quoteSqlStr: quoteSqlStr,
   searchURL: searchURL,
   formatDateISO: formatDateISO,
   formatDateLocal: formatDateLocal,
   loadMfrNames: loadMfrNames,
   originURL: originURL,
+  rowId: rowId,
+  formatSize: formatSize,
 };

@@ -1,0 +1,69 @@
+extends layout
+
+block content
+  h1= title
+
+  each error in errors
+    div(role="alert").alert.alert-warning= error
+
+  p
+    if add
+      | Enter a new
+    else
+      | Edit an existing
+    |  public service announcement for one or a set of motors.
+    |  Please select an document, a link to the notification on another site, 
+    i or
+    |  enter the body of the announcement here. (Only one of the three will be shown, in that order.)
+    | If your notification needs a new document, you should 
+    a(href="/admin/document/add") upload one first
+    | .
+
+  form(method="POST")
+    .form-row
+      .form-col.col-md-3
+        .form-group
+          label(for="date")
+            | Posted date
+          input(type="date", name="date" value=date_iso required).form-control
+      .form-col.col-md-9
+        .form-group
+          label(for="headline")
+            | Headline
+          input(type="text", name="headline" value=headline required).form-control
+
+    .form-row
+      .form-col.col-md-6
+        .form-group
+          label(for="document_name")
+            | Uploaded document
+          select(name="document_name").form-control
+            option(value="" selected=(document_name == null)) (none)
+            each file in documents
+              option(selected=(document_name == file))= file
+      .form-col.col-md-6
+        .form-group
+          label(for="url")
+            | External URL
+          input(type="url", name="url" value=url).form-control
+
+    .form-row
+      .form-col.col
+        .form-group
+          label(for="body")
+            | Body text (formatted with Markdown)
+          textarea(name="body" rows="20").form-control= body
+
+    .form-row
+      .form-col.col
+        .form-group
+          .form-check
+            input(type="checkbox", name="expired" checked=expired).form-check-input
+            label(for="expired") Expired
+
+    .form-row
+      .form-col.col
+        .form-group
+          button(type="submit").btn.btn-primary Submit
+          span &nbsp;
+          button(type="reset").btn.btn-secondary Reset

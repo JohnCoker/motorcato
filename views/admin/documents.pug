@@ -1,0 +1,18 @@
+extends layout
+
+block content
+  h1= title
+
+  table.existing.table
+    thead
+      tr
+        th File name
+        th Content type
+    each row in existing
+      tr
+        td
+          a(href="/document/" + row.filename)= row.filename
+        td= row.content_type
+
+  p
+    a(href="/admin/document/add") Upload a document

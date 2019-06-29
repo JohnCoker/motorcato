@@ -1,6 +1,5 @@
 const express = require('express'),
       router = express.Router(),
-      moment = require('moment'),
       searchURL = require('./util.js').searchURL,
       formatDateISO = require('./util.js').formatDateISO,
       formatDateLocal = require('./util.js').formatDateLocal;

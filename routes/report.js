@@ -1,6 +1,5 @@
 const express = require('express'),
       router = express.Router(),
-      moment = require('moment'),
       loadMfrNames = require('./util.js').loadMfrNames;
 
 const ReportTitle = 'Report a Malfunction';

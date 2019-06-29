@@ -1,0 +1,23 @@
+extends layout
+
+block content
+  h1= title
+
+  each error in errors
+    div(role="alert").alert.alert-warning= error
+
+  p
+    | Upload a PDF document that can be used in a notification.
+
+  form(method="POST" enctype="multipart/form-data")
+    .form-row
+      .form-col.col
+        .form-group
+          input(type="file", name="file" accept="application/pdf" required).form-control-file
+
+    .form-row
+      .form-col.col
+        .form-group
+          button(type="submit").btn.btn-primary Submit
+          span &nbsp;
+          button(type="reset").btn.btn-secondary Reset

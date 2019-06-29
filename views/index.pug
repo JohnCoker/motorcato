@@ -34,7 +34,6 @@ block content
   table.notifications
     each row in notifications
       tr
-        td.date= row.dateStr
+        td.date= row.date_local
         td.headline
           a(href=row.url)= row.headline
-          

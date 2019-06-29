@@ -55,12 +55,6 @@ function readBody(req, res, next, handler) {
 }
 
 router.use(express.json());
-router.use(function(err, req, res, next) {
-  if (err instanceof SyntaxError)
-    sendError(req, res, undefined, ParseError, 'Unable to parse request body as JSON.');
-  else
-    next();
-});
 
 /*
  * /api/1/manufacturers

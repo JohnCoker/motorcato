@@ -20,6 +20,7 @@
     "markdown-it": "^8.4.2",
     "moment": "^2.24.0",
     "morgan": "~1.9.0",
+    "multer": "^1.4.1",
     "pg": "^7.10.0",
     "pg-large-object": "^2.0.0",
     "pug": "^2.0.3",

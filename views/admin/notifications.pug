@@ -1,0 +1,25 @@
+extends layout
+
+block content
+  h1= title
+
+  table.existing.table
+    thead
+      tr
+        th Date
+        th Headline
+        th Status
+        th Manage
+    each row in existing
+      tr
+        td= row.date_local
+        td= row.headline
+        td
+          if row.expired
+            i expired
+          else
+            i current
+        td
+          a(href=("/admin/notification/" + row.id)) Edit
+  p
+    a(href="/admin/notification/add") Add a notification

@@ -1,12 +1,26 @@
 const express = require('express'),
       router = express.Router(),
+      moment = require('moment'),
       crypto = require('crypto'),
       bcrypt = require('bcrypt'),
       sgMail = require('@sendgrid/mail'),
+      multer = require('multer'),
+      { LargeObjectManager } = require('pg-large-object'),
       quoteSqlStr = require('./util.js').quoteSqlStr,
-      originURL = require('./util.js').originURL;
+      originURL = require('./util.js').originURL,
+      formatDateISO = require('./util.js').formatDateISO,
+      formatDateLocal = require('./util.js').formatDateLocal,
+      rowId = require('./util.js').rowId,
+      isEmpty = require('./util.js').isEmpty,
+      nonEmpty = require('./util.js').nonEmpty;
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const upload = multer({
+  dest: '/tmp/',
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+  },
+});
 
 /*
  * Login required for all admin pages, except login and forgotten password pages.
@@ -58,7 +72,7 @@ router.post('/login', function(req, res, next) {
     props.errors.push('Both email address and password must be specified.');
     res.render('admin/login', props);
   } else {
-    let select = "select passwd from admins where email = " + quoteSqlStr(email) + " and enabled";
+    let select = "select id, passwd from admins where email = " + quoteSqlStr(email) + " and enabled";
     req.pool.query(select, (err, q) => {
       if (err)
         return next(err);
@@ -70,6 +84,7 @@ router.post('/login', function(req, res, next) {
 
         if (match) {
           req.session.authenticated = true;
+          req.session.admin_id = record.id;
           let dest = req.body.from == null || req.body.from === '' ? '/admin' : req.body.from;
           res.redirect(302, dest);
         } else {
@@ -141,9 +156,8 @@ If you aren't part of the Malfunctioning Engine Statistical Survey, please ignor
 Do not reply to this email; it was sent automatically.
 
 Malfunctioning Engine Statistical Survey • PO Box 407 • Marion, IA 52302`
-          });
-          
-          res.render('admin/forgot', props);
+          }).then(() => res.render('admin/forgot', props))
+            .catch(e => next(e));
         });
       } else {
         res.render('admin/forgot', props);
@@ -242,7 +256,7 @@ router.post('/reset', function(req, res, next) {
 });
 
 /*
- * Reject a failure report
+ * Reject a failure report.
  */
 router.get('/reject', function(req, res, next) {
   let id = req.query.id;
@@ -258,5 +272,264 @@ router.get('/reject', function(req, res, next) {
     });
   }
 });
+
+
+/*
+ * Document management routes.
+ * /admin/documents list
+ * /admin/document/add upload
+ */
+function documentProps(req) {
+  return {
+    title: "Manage Documents",
+    errors: [],
+  };
+}
+
+router.get('/documents', function(req, res, next) {
+  let props = documentProps(req);
+  req.pool.query("select * from documents order by filename", (err, q) => {
+    if (err)
+      return next(err);
+
+    props.existing = [];
+    if (q.rows) {
+      q.rows.forEach(r => {
+        props.existing.push({
+          id: r.id,
+          filename: r.filename,
+          content_type: r.content_type,
+        });
+      });
+    }
+    res.render('admin/documents', props);
+  });
+});
+
+router.get('/document/add', function(req, res, next) {
+  res.render('admin/document-add', documentProps());
+});
+
+router.post('/document/add', upload.single('file'), function(req, res, next) {
+  let props = documentProps(req);
+
+  if (req.file == null || req.file.originalname == null || req.file.mimetype != 'application/pdf') {
+    props.errors.push('Please select a PDF file to upload.');
+    return res.render('admin/document-add', props);
+  }
+
+  req.pool.connect((err, client, release) => {
+    if (err)
+      return next(err);
+
+    const lom = new LargeObjectManager({ pg: client });
+    client.query('begin', (err, tx) => {
+      if (err) {
+        release(err);
+        return next(err);
+      }
+
+      lom.createAndWritableStream(2048 * 8, (err, oid, ostream) => {
+        if (err) {
+          release(err);
+          return next(err);
+        }
+
+        ostream.on('finish', (err) => {
+          client.query("insert into documents (filename, content_type, content_oid, uploaded_by)" +
+                       " values ($1, $2, $3, $4)",
+                       [req.file.originalname, req.file.mimetype, oid, req.session.admin_id],
+                       (err, q) => {
+                         if (err) {
+                           release(err);
+                           return next(err);
+                         }
+                         client.query('commit', release);
+                         res.redirect(302, '/admin/documents');
+                       });
+        });
+        var istream = require('fs').createReadStream(req.file.path);
+        istream.pipe(ostream)
+               .on('error', err => {
+                 release(err);
+                 next(err);
+               });
+      });
+    });
+  });
+});
+
+
+/*
+ * Notification management routes.
+ * /admin/notifications list
+ * /admin/notification/id edit
+ */
+function notificationProps(req) {
+  return {
+    title: "Manage Notifications",
+    errors: [],
+  };
+}
+
+function queryDocuments(req) {
+  return new Promise((resolve, reject) => {
+    req.pool.query("select filename from documents order by 1", (err, q) => {
+      if (err)
+
+        return reject(err);
+      let docs = [];
+      if (q.rows)
+        q.rows.forEach(r => docs.push(r.filename));
+      resolve(docs);
+    });
+  });
+}
+
+router.get('/notifications', function(req, res, next) {
+  let props = notificationProps(req);
+  req.pool.query("select * from notifications order by date desc", (err, q) => {
+    if (err)
+      return next(err);
+
+    props.existing = [];
+    if (q.rows) {
+      q.rows.forEach(r => {
+        props.existing.push({
+          id: r.id,
+          date_iso: formatDateISO(r.date),
+          date_local: formatDateLocal(req, r.date),
+          headline: r.headline,
+          expired: r.expired,
+        });
+      });
+    }
+    res.render('admin/notifications', props);
+  });
+});
+
+router.get('/notification/add', function(req, res, next) {
+  let props = notificationProps(req);
+  props.add = true;
+  let now = new Date();
+  props.date_iso = formatDateISO(now);
+  props.date_local = formatDateLocal(req, now);
+  queryDocuments(req)
+    .then(d => {
+      props.documents = d;
+      res.render("admin/notification-edit", props);
+    })
+    .catch(e => next(e));
+});
+
+router.post('/notification/add', function(req, res, next) {
+  let props = notificationProps(req);
+  props.add = true;
+  props.date_iso = formatDateISO(new Date());
+  updateNotification(props, req, res, next);
+});
+
+router.get('/notification/:id', function(req, res, next) {
+  let props = notificationProps(req);
+  props.add = false;
+  let id = rowId(req.params.id);
+  req.pool.query("select * from notifications where id = " + id, (err, q) => {
+    if (err)
+      return next(err);
+
+    if (q.rows && q.rows.length == 1) {
+      let r = q.rows[0];
+      props.id = r.id;
+      props.date_iso = formatDateISO(r.date);
+      props.date_local = formatDateLocal(req, r.date);
+      props.headline = r.headline;
+      props.url = r.url;
+      props.document_name = r.document_name;
+      props.body = r.body;
+      props.expired = r.expired;
+    } else {
+      props.not_found = true;
+      props.errors.push('Notification not found.');
+    }
+    queryDocuments(req)
+      .then(d => {
+        props.documents = d;
+        res.render("admin/notification-edit", props);
+      })
+      .catch(e => next(e));
+  });
+});
+
+router.post('/notification/:id', function(req, res, next) {
+  let id = rowId(req.params.id);
+  if (id < 0)
+    return res.redirect(302, '/admin/notifications');
+
+  let props = notificationProps(req);
+  props.id = id;
+  props.add = false;
+  updateNotification(props, req, res, next);
+});
+
+function updateNotification(props, req, res, next) {
+  let failed = false;
+
+  let date = moment(req.body.date, 'YYYY-M-D', true);
+  if (date == null || !date.isValid()) {
+    props.errors.push('Please enter the date on which the notification was posted.');
+    failed = true;
+  } else
+    props.date_iso = formatDateISO(date);
+
+  let headline = nonEmpty(req.body.headline);
+  if (headline == null) {
+    props.errors.push('Please enter a headline, displayed on the home page.');
+    failed = true;
+  }
+  else
+    props.headline = headline;
+
+  let document_name = props.document_name = nonEmpty(req.body.document_name);
+  let url = props.url = nonEmpty(req.body.url);
+  let body = props.body = nonEmpty(req.body.body);
+  if (document_name == null && url == null && body == null) {
+    props.errors.push('Please pick a document, enter a URL or body text to display.');
+    failed = true;
+  }
+
+  let expired = props.expired = nonEmpty(req.body.expired) != null;
+
+  if (failed) {
+    queryDocuments(req)
+      .then(d => {
+        props.documents = d;
+        res.render("admin/notification-edit", props);
+      })
+      .catch(e => next(e));
+  } else {
+    let query, values;
+    if (props.add) {
+      query = ("insert into notifications (date, headline, document_name, url, body, posted_by, expired)\n" +
+               " values ($1, $2, $3, $4, $5, $6, $7)");
+      values = [date, headline, document_name, url, body, req.session.admin_id, expired];
+    } else {
+      query = ("update notifications\n" +
+               " set date = $1,\n" +
+               "     headline = $2,\n" +
+               "     document_name = $3,\n" + 
+               "     url = $4,\n" +
+               "     body = $5,\n" +
+               "     expired = $6\n" +
+               " where id = $7");
+      values = [date, headline, document_name, url, body, expired, props.id];
+    }
+    req.pool.query(query, values, (err, q) => {
+      if (err)
+        return next(err);
+
+      res.redirect(302, '/admin/notifications');
+    });
+  }
+}
 
 module.exports = router;
