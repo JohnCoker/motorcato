@@ -158,6 +158,7 @@ Do not reply to this email; it was sent automatically.
 Malfunctioning Engine Statistical Survey • PO Box 407 • Marion, IA 52302`
           }).then(() => res.render('admin/forgot', props))
             .catch(e => next(e));
+    res.render('admin/invite', props);
         });
       } else {
         res.render('admin/forgot', props);
@@ -531,5 +532,72 @@ function updateNotification(props, req, res, next) {
     });
   }
 }
+
+/*
+ * Invite admin route.
+ */
+function inviteProps(req) {
+  return {
+    title: "Invite Administrator",
+    errors: [],
+  };
+}
+
+router.get('/invite', function(req, res, next) {
+  res.render("admin/invite", inviteProps(req));
+});
+
+router.post('/invite', function(req, res, next) {
+  let email = req.body.email,
+      props = inviteProps(req);
+
+  props.submitted = true;
+  if (email == null || email === '') {
+    props.errors.push('A valid email address must be specified.');
+    res.render('admin/invite', props);
+  } else {
+    let select = "select id, enabled from admins where email = " + quoteSqlStr(email);
+    req.pool.query(select, (err, q) => {
+      if (err)
+        return next(err);
+
+      if (q.rows && q.rows.length > 0) {
+        props.errors.push('That email address is already registered.');
+        res.render('admin/invite', props);
+      } else {
+        let token = crypto.randomBytes(16).toString('hex');
+        let insert = ("insert into admins (email, passwd, enabled, reset_token, reset_expires)" +
+                      " values (" + quoteSqlStr(email) +
+                      ", '!', true, " + quoteSqlStr(token) +
+                      ", now() + interval '48 hour')");
+        req.pool.query(insert, (err, q) => {
+          if (err)
+            return next(err);
+
+          let url = originURL(req) + '/admin/reset?email=' + encodeURIComponent(email) + '&token=' + token;
+          sgMail.send({
+            to: email,
+            from: 'motorcato.org <noreply@motorcato.org>',
+            subject: 'motorcato.org administrator invitation',
+            text: `You have been invited to be an adminstrator of motorcato.org.
+If you are expecting this, please follow the link below to reset your password.
+If not, just ignore this message.
+
+ ${url}
+
+You must be a registered administrator of motorcato.org.
+If you aren't part of the Malfunctioning Engine Statistical Survey, please ignore this message.
+Do not reply to this email; it was sent automatically.
+
+Malfunctioning Engine Statistical Survey • PO Box 407 • Marion, IA 52302`
+          }).then(() => {
+            props.sent = true;
+            res.render('admin/invite', props);
+          }).catch(e => next(e));
+        });
+      }
+    });
+  }
+});
 
 module.exports = router;
