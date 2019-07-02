@@ -13,10 +13,17 @@ block content
     | i.help { margin-left: 0.25em; }
     | .popover form { display: inline-block; margin-top: 0; margin-left: auto; margin-right: auto; }
 
-  p To report a failure with a model or high-power rocket engine, complete and submit this form.
-
   each error in errors
     div(role="alert").alert.alert-warning= error
+
+  if entered
+    div(role="alert").alert.alert-success
+      | Thank you for submitting your failure report! 
+      if url
+        a(href=url) View it here
+    p If you have another to report, please enter it now.
+  else
+    p To report a failure with a model or high-power rocket engine, complete and submit this form.
 
   form(method="post", action="/report").report
     .form-row.section
@@ -30,9 +37,9 @@ block content
             | Manufacturer
             i(data-content="The maker of the motor (engine)").help-simple
           select(name="manufacturer" required="true").form-control
-            option(value="", disabled="true" hidden="true" selected="true") (select)
+            option(value="", disabled="true" hidden="true") (select)
             each mfr in manufacturers
-              option= mfr
+              option(selected=(manufacturer == mfr))= mfr
       .form-col.col-md-3
         .form-group
           label(for="designation")
@@ -45,10 +52,10 @@ block content
             | Type
             i(data-content="What type of motor it is. If unsure, probably 'single-use'").help-simple
           select(name="motor_type" required="true").form-control
-            option(value="", disabled="true" hidden="true" selected="true") (select)
-            option(value="SU") single-use
-            option reload
-            option hybrid
+            option(value="", disabled="true" hidden="true") (select)
+            option(value="SU" selected=(motor_type == 'SU')) single-use
+            option(selected=(motor_type == 'reload')) reload
+            option(selected=(motor_type == 'hybrid')) hybrid
       .form-col.col-md-3
         .form-group
           label(for="serial_no")
@@ -65,20 +72,20 @@ block content
         .form-group
           label(for="failure_date")
             | Date of Failure
-            i(data-content="The data the motor (engine) was used").help-simple
-          input(type="date", name="failure_date" value=failure_date).form-control
+            i(data-content="The date the motor (engine) was used").help-simple
+          input(type="date" name="failure_date" value=failure_date).form-control
       .form-col.col-md-4
         .form-group
           label(for="location")
             | Geographic Location
             i(data-content="Where the motor (engine) was used").help-simple
-          input(type="text", name="location" value=location).form-control
+          input(type="text" name="location" value=location).form-control
       .form-col.col-md-4
         .form-group
           label(for="temperature")
             | Approximate Temperature (℉)
             i.help.help-temp
-          input(type="number", name="temperature" value=temperature).form-control
+          input(type="number" name="temperature" value=temperature).form-control
     .form-row
       .form-col
         label
@@ -87,51 +94,51 @@ block content
     .form-row
       .form-col.col-md-3
         .form-check
-          input(type="checkbox" name="fail_nozzle_blown" value=fail_nozzle_blown).form-check-input
+          input(type="checkbox" name="fail_nozzle_blown" checked=fail_nozzle_blown).form-check-input
           label(for="fail_nozzle_blown").form-check-label Nozzle blown out
       .form-col.col-md-3
         .form-check
-          input(type="checkbox" name="fail_ejection_blown" value=fail_ejection_blown).form-check-input
+          input(type="checkbox" name="fail_ejection_blown" checked=fail_ejection_blown).form-check-input
           label(for="fail_ejection_blown").form-check-label Ejection end blown out
       .form-col.col-md-3
         .form-check
-          input(type="checkbox" name="fail_casing_split" value=fail_casing_split).form-check-input
+          input(type="checkbox" name="fail_casing_split" checked=fail_casing_split).form-check-input
           label(for="fail_casing_split").form-check-label Casing split
       .form-col.col-md-3
         .form-check
-          input(type="checkbox" name="fail_propellant_ejected" value=fail_propellant_ejected).form-check-input
+          input(type="checkbox" name="fail_propellant_ejected" checked=fail_propellant_ejected).form-check-input
           label(for="fail_propellant_ejected").form-check-label Burning propellant ejected
     .form-row
       .form-col.col-md-3
         .form-check
-          input(type="checkbox" name="fail_burn_through" value=fail_burn_through).form-check-input
+          input(type="checkbox" name="fail_burn_through" checked=fail_burn_through).form-check-input
           label(for="fail_burn_through").form-check-label Casing burned through (describe where)
             input(type="text" name="burn_through_loc" value=burn_through_loc).form-control
       .form-col.col-md-3
         .form-check
-          input(type="checkbox" name="fail_no_ejection" value=fail_no_ejection).form-check-input
+          input(type="checkbox" name="fail_no_ejection" checked=fail_no_ejection).form-check-input
           label(for="fail_no_ejection").form-check-label No ejection charge (cap retained)
       .form-col.col-md-3
         .form-check
-          input(type="checkbox" name="fail_bad_delay" value=fail_bad_delay).form-check-input
+          input(type="checkbox" name="fail_bad_delay" checked=fail_bad_delay).form-check-input
           label(for="fail_bad_delay").form-check-label Delay inaccurate (estimate actual delay)
-            input(type="number" name="actual_delay" value=actual_delay).form-control
+            input(type="number" name="actual_delay" min="0" step="0.1" value=actual_delay).form-control
       .form-col.col-md-3
     .form-row
       .form-col.col-md-6
         .form-check
-          input(type="checkbox" name="fail_other" value=fail_other).form-check-input
+          input(type="checkbox" name="fail_other" checked=fail_other).form-check-input
           label(for="fail_other").form-check-label Other failure (describe)
         .form-group
-          textarea(name="other_desc" width="100%" value=other_desc).form-control
+          textarea(name="other_desc" width="100%").form-control= other_desc
       .form-col.col-md-6
     .form-row
       .form-col.col-md-6
         .form-check
-          input(type="checkbox" name="reported_mfr" value=reported_mfr).form-check-input
+          input(type="checkbox" name="reported_mfr" checked=reported_mfr).form-check-input
           label(for="reported_mfr").form-check-label Already reported to manufacturer
         .form-check
-          input(type="checkbox" name="more_motors" value=more_motors).form-check-input
+          input(type="checkbox" name="more_motors" checked=more_motors).form-check-input
           label(for="more_motors").form-check-label I still have this motor or others from the same pack
       .form-col.col-md-6
 
@@ -140,7 +147,7 @@ block content
         h2 Comments
         p Any extra information, including how long the motor burned before failure, is helpful.
         .form-group
-          textarea(name="comments" rows="4" value=comments).form-control
+          textarea(name="comments" rows="4").form-control= comments
       .form-col.col-md-6
 
     .form-row.section
@@ -176,11 +183,11 @@ block content
       .form-col.col-md-3
         .form-group
           label(for="reporter_city") City
-          input(type="text" name="reporter_city" autocomplete="city" value=reporter_city).form-control
+          input(type="text" name="reporter_city" autocomplete="locality" value=reporter_city).form-control
       .form-col.col-md-3
         .form-group
           label(for="reporter_state") State
-          input(type="text" name="reporter_state" autocomplete="state" value=reporter_state).form-control
+          input(type="text" name="reporter_state" autocomplete="region" value=reporter_state).form-control
       .form-col.col-md-3
         .form-group
           label(for="reporter_zip") Zip
