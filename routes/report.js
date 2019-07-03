@@ -1,4 +1,5 @@
 const express = require('express'),
+      https = require('https'),
       router = express.Router(),
       loadMfrNames = require('./util.js').loadMfrNames,
       isEmpty = require('./util.js').isEmpty,
@@ -12,6 +13,8 @@ const express = require('express'),
       originURL = require('./util.js').originURL;
 
 const ReportTitle = 'Report a Malfunction';
+
+const ReCaptchaSecret = process.env.RECAPTCHA_SECRET;
 
 function reportProps() {
   let props = {
@@ -123,8 +126,9 @@ router.post('/report', function(req, res, next) {
     props.reporter_ukra = posInteger(req.body.reporter_ukra);
 
     if (failed)
-      res.render('report', props);
-    else {
+      return res.render('report', props);
+
+    function insert() {
       let columns = [];
       let values = [];
       function cv(col) {
@@ -181,6 +185,40 @@ router.post('/report', function(req, res, next) {
           props.url = originURL(req) + "/search?id=" + q.rows[0].id;
         res.render('report', props);
       });
+    }
+
+    // check reCAPTCHA
+    if (!failed) {
+      let data = ('secret=' + ReCaptchaSecret +
+                  '&response=' + encodeURIComponent(req.body['g-recaptcha-response']));
+      let post = https.request({
+        hostname: 'www.google.com',
+        port: 443,
+        path: '/recaptcha/api/siteverify',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': data.length,
+          'Accept': 'application/json',
+        }
+      }, rsp => {
+        rsp.on('data', d => {
+          let r;
+          try {
+            r = JSON.parse(d.toString());
+          } catch (e) {
+          }
+          if (r == null || r.success != true) {
+            props.errors.push('Please check "I\'m not a robot" and resubmit.');
+            res.render('report', props);
+          } else {
+            insert();
+          }
+        });
+      });
+      post.on('error', next);
+      post.write(data);
+      post.end();
     }
   }).catch(err => next(err));
 });
