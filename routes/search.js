@@ -37,6 +37,10 @@ const FailureCols = [];
     aliases: ["type"],
   },
   {
+    col: "serial_no",
+    aliases: ["code"],
+  },
+  {
     col: "failure_date",
     aliases: ["date"],
     type: "date",
