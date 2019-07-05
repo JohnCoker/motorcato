@@ -154,6 +154,7 @@ const FieldMap = {
   },
   CasingDate: {
     toField: 'serial_no',
+    convert: v => /^unk/i.test(v) ? null : v,
   },
   FailureDate: {
     toField: 'failure_date',
@@ -269,7 +270,8 @@ fs.createReadStream(infile)
       lineNum++;
       let orig = row[key];
       if (orig == null || orig === '' || orig === 'NULL' || /^\s*$/.test(orig) ||
-          /^-+$/.test(orig) || /^n *\/ *a*$/i.test(orig) || /^na$/i.test(orig) || /^unknown$/i.test(orig))
+          /^-+$/.test(orig) || /^n *\/ *a*$/i.test(orig) || /^na$/i.test(orig) ||
+          /^unknown/i.test(orig) || /^none/i.test(orig))
         orig = null;
       let value = orig;
 

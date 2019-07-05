@@ -23,7 +23,10 @@ block content
         a(href=url) View it here
     p If you have another to report, please enter it now.
   else
-    p To report a failure with a model or high-power rocket engine, complete and submit this form.
+    p
+      | To report a failure with a model or high-power rocket engine, complete and submit this form.
+      |  If you don't know some of the information requested, leave those fields blank. (Very few
+      |  of the fields are absolutely required.)
 
   form(method="post", action="/report").report
     .form-row.section
