@@ -104,6 +104,14 @@ block content
     .row
       .col.label Comments
       .col.value= result.comments
+  if result.hasPhotos
+    .row
+      .col.label Photos
+      .col.value
+        each photo in result.photos
+          a(href=photo.url title="click for full size")
+            img(src=photo.url height=100 alt=photo.filename)
+
   if result.reported_date
     .row
       .col.label Reported date

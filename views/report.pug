@@ -28,7 +28,7 @@ block content
       |  If you don't know some of the information requested, leave those fields blank. (Very few
       |  of the fields are absolutely required.)
 
-  form(method="post", action="/report").report
+  form(method="post", action="/report" enctype="multipart/form-data").report
     .form-row.section
       .form-col
         h2 Engine Data
@@ -152,6 +152,10 @@ block content
         .form-group
           textarea(name="comments" rows="4").form-control= comments
       .form-col.col-md-6
+        h2 Picture
+        p If you took photos of the damaged motor, please upload one that best shows the failure.
+        .form-group
+          input(type="file" name="photo" accept="image/jpeg" capture="camera").form-control-file
 
     .form-row.section
       .form-col

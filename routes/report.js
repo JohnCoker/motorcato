@@ -1,6 +1,9 @@
 const express = require('express'),
       https = require('https'),
       router = express.Router(),
+      multer = require('multer'),
+      { LargeObjectManager } = require('pg-large-object'),
+      imageSize = require('image-size'),
       loadMfrNames = require('./util.js').loadMfrNames,
       isEmpty = require('./util.js').isEmpty,
       nonEmpty = require('./util.js').nonEmpty,
@@ -15,6 +18,13 @@ const express = require('express'),
 const ReportTitle = 'Report a Malfunction';
 
 const ReCaptchaSecret = process.env.RECAPTCHA_SECRET;
+
+const upload = multer({
+  dest: '/tmp/',
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+  },
+});
 
 function reportProps() {
   let props = {
@@ -33,7 +43,7 @@ router.get(['/report', '/report.html'], function(req, res, next) {
                .catch(err => next(err));
 
 });
-router.post('/report', function(req, res, next) {
+router.post('/report', upload.single('photo'), function(req, res, next) {
   reportProps().then(props => {
     let failed = false;
 
@@ -125,6 +135,21 @@ router.post('/report', function(req, res, next) {
     props.reporter_tra = posInteger(req.body.reporter_tra);
     props.reporter_ukra = posInteger(req.body.reporter_ukra);
 
+    let photoSize;
+    if (req.file != null) {
+      if (req.file.originalname == null || req.file.mimetype != 'image/jpeg') {
+        props.errors.push('Please select only a JPEG image file for the photo.');
+        failed = true;
+      } else {
+        photoSize = imageSize(req.file.path);
+        if (photoSize == null || photoSize.type != 'jpg' ||
+            photoSize.width <= 0 || photoSize.height <= 0) {
+          props.errors.push('Invalid JPEG image file for the photo.');
+          failed = true;
+        }
+      }
+    }
+
     if (failed)
       return res.render('report', props);
 
@@ -173,17 +198,70 @@ router.post('/report', function(req, res, next) {
       cv('reporter_car');
       cv('reporter_tra');
       cv('reporter_ukra');
-      let insert = ("insert into reports (" + columns.join(", ") + ")" +
-                    "\n values (" + columns.map((v, i) => "$" + (i + 1)).join(", ") + ")" +
-                    "  returning id");
-      req.pool.query(insert, values, (err, q) => {
+
+      req.pool.connect((err, client, release) => {
         if (err)
           return next(err);
 
-        props.entered = true;
-        if (q.rows.length == 1 && q.rows[0].id > 0)
-          props.url = originURL(req) + "/search?id=" + q.rows[0].id;
-        res.render('report', props);
+        client.query('begin', (err, tx) => {
+          if (err) {
+            release(err);
+            return next(err);
+          }
+
+          let insert = ("insert into reports (" + columns.join(", ") + ")" +
+                        "\n values (" + columns.map((v, i) => "$" + (i + 1)).join(", ") + ")" +
+                        "  returning id");
+          client.query(insert, values, (err, q) => {
+            if (err) {
+              release(err);
+              return next(err);
+            }
+
+            // report record created
+            props.entered = true;
+            let reportId = q.rows[0].id;
+            props.url = originURL(req) + "/search?id=" + reportId;
+
+            if (req.file != null) {
+              // upsert photo image and child record
+              const lom = new LargeObjectManager({ pg: client });
+              lom.createAndWritableStream(2048 * 8, (err, oid, ostream) => {
+                if (err) {
+                  release(err);
+                  return next(err);
+                }
+
+                ostream.on('finish', (err) => {
+                  let insert = ("insert into photos (report, filename, content_type, image_oid, width, height, orientation)" +
+                            " values ($1, $2, $3, $4, $5, $6, $7)");
+                  client.query(insert,
+                               [reportId, req.file.originalname, req.file.mimetype,
+                                oid,
+                                photoSize.width, photoSize.height, photoSize.orientation],
+                               (err, q) => {
+                                 if (err) {
+                                   release(err);
+                                   return next(err);
+                                 }
+                                 client.query('commit', release);
+                                 res.render('report', props);
+                               });
+                });
+                var istream = require('fs').createReadStream(req.file.path);
+                istream.pipe(ostream)
+                       .on('error', err => {
+                         release(err);
+                         next(err);
+                       });
+              });
+            } else {
+              // done with report
+              client.query('commit', release);
+              res.render('report', props);
+            }
+          });
+        });
       });
     }
 

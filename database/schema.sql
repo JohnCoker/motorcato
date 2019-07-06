@@ -70,16 +70,11 @@ create table reports (
 create table photos (
   id serial primary key,
   report integer not null references reports,
-  image bytea not null,
+  filename text,
+  content_type text,
+  image_oid oid not null,
   width integer not null,
   height integer not null,
   resolution integer,
   orientation integer
-);
-create table notes (
-  id serial primary key,
-  report integer not null references reports,
-  posted_by integer not null references admins,
-  date date not null,
-  note text not null
 );

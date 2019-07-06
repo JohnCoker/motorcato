@@ -1,6 +1,7 @@
 const express = require('express'),
       router = express.Router(),
       moment = require('moment'),
+      { LargeObjectManager } = require('pg-large-object'),
       quoteSqlStr = require('./util.js').quoteSqlStr,
       searchURL = require('./util.js').searchURL,
       formatDateISO = require('./util.js').formatDateISO,
@@ -255,7 +256,22 @@ function searchPage(req, res, next, params) {
       if (props.results.length == 1) {
         props.title = 'Search Result';
         props.result = props.results[0];
-        res.render('search-single', props);
+        req.pool.query("select * from photos where report = " + props.result.id, (err, q) => {
+          if (err)
+            return next(err);
+
+          if (q.rows && q.rows.length > 0) {
+            props.result.hasPhotos = true;
+            props.result.photos = q.rows.map(p => {
+              p.url = "/photo/" + p.id;
+              return p;
+            });
+          } else {
+            props.result.hasPhotos = false;
+            props.result.photos = [];
+          }
+          res.render('search-single', props);
+        });
       } else if (props.results.length > 1) {
         props.title = 'Search Results';
         if (props.results.length > LimitPlus) {
@@ -292,6 +308,49 @@ router.get(['/search', '/search.html'], function(req, res, next) {
 });
 router.post('/search', function(req, res, next) {
   searchPage(req, res, next, req.body);
+});
+
+router.get('/photo/:id', function(req, res, next) {
+  if (req.params.id == null || req.params.id === '')
+    return next();
+  req.pool.connect((err, client, release) => {
+    if (err)
+      return next(err);
+
+    const lom = new LargeObjectManager({ pg: client });
+    client.query('begin', (err, tx) => {
+      if (err) {
+        release(err);
+        return next(err);
+      }
+
+      client.query('select * from photos where id = $1', [req.params.id], (err, q) => {
+        if (err) {
+          release(err);
+          return next(err);
+        }
+        if (q.rows.length != 1) {
+          release();
+          return next();
+        }
+        const r = q.rows[0];
+
+        lom.openAndReadableStream(r.image_oid, 2048 * 8, (err, size, stream) => {
+          if (err) {
+            release(err);
+            return next(err);
+          }
+          res.type(r.content_type)
+             .set('Content-Length', size);
+          stream.on('readable', () => res.write(stream.read()))
+                .on('end', () => {
+                  res.end();
+                  client.query('commit', release);
+                });
+        });
+      });
+    });
+  });
 });
 
 module.exports = router;
