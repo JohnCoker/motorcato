@@ -161,7 +161,7 @@ block content
       .form-col
         h2 Reported By
         p
-          | All of this information is optional, but we appreciate at least an email address in case we need more
+          | Most of this information is optional, but please enter your name and an email address in case we need more
           |  info. None of this will be publicly visible.
     .form-row
       .form-col.col-md-6
@@ -169,13 +169,13 @@ block content
           label(for="reporter_name")
             | Submitter name
             i(data-content="Please enter your name; this will not be publicly visible").help-simple
-          input(type="text" name="reporter_name" autocomplete="name" value=reporter_name).form-control
+          input(type="text" name="reporter_name" autocomplete="name" value=reporter_name required).form-control
       .form-col.col-md-6
         .form-group
           label(for="reporter_email")
             | E-mail
             i(data-content="Please enter your email address; this will not be publicly visible").help-simple
-          input(type="email" name="reporter_email" autocomplete="email" value=reporter_email).form-control
+          input(type="email" name="reporter_email" autocomplete="email" value=reporter_email required).form-control
     .form-row
       .form-col.col-md-6
         .form-group

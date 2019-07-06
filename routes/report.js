@@ -124,6 +124,11 @@ router.post('/report', upload.single('photo'), function(req, res, next) {
 
     props.reporter_name = nonEmpty(req.body.reporter_name);
     props.reporter_email = nonEmpty(req.body.reporter_email);
+    if (props.reporter_name == null || props.reporter_email == null) {
+      props.errors.push('Please enter your name and email address (it will be private).');
+      failed = true;
+    }
+
     props.reporter_addr1 = nonEmpty(req.body.reporter_addr1);
     props.reporter_addr2 = nonEmpty(req.body.reporter_addr2);
     props.reporter_city = nonEmpty(req.body.reporter_city);
