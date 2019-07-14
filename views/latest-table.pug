@@ -5,6 +5,7 @@
       tr
         th(data-priority="9" title="motor manufacturer") Manufacturer
         th(data-priority="9" title="common name of motor") Motor
+        th(data-priority="5" title="type of motor") Type
         th(data-priority="1" title="most recent failure date") Last
         th(data-priority="2" title="number of failures reported") Count
     tbody
@@ -14,5 +15,6 @@
             a(href=row.manufacturer_search)= row.manufacturer
           td(title="all failures for this motor")
             a(href=row.motor_search)= row.common_name
+          td= row.motor_type
           td(data-sort=row.last_date_iso)= row.last_date_local
           td= row.count

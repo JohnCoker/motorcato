@@ -5,22 +5,22 @@ const express = require('express'),
       formatDateLocal = require('./util.js').formatDateLocal;
 
 const LatestSelect = `
-select manufacturer, common_name, max(failure_date) as last_date, count(*)
+select manufacturer, common_name, motor_type, max(failure_date) as last_date, count(*)
  from reports
 `;
 
 const LastFailuresQuery = `${LatestSelect}
  where not rejected and failure_date >= now() - interval '90 days'
- group by 1, 2
- order by 3 desc, 4 desc, 1, 2
+ group by 1, 2, 3
+ order by 4 desc, 5 desc, 1, 2, 3
  limit 25
 `;
 
 const MostFailuresQuery = `${LatestSelect}
  where not rejected
- group by 1, 2
+ group by 1, 2, 3
  having count(*) > 1
- order by 4 desc, 3 desc, 1, 2
+ order by 5 desc, 4 desc, 1, 2, 3
  limit 25
 `;
 
@@ -34,6 +34,7 @@ router.get(['/latest', '/latest.html'], function(req, res, next) {
       return {
         manufacturer: r.manufacturer,
         common_name: r.common_name,
+        motor_type: r.motor_type,
         last_date_iso: formatDateISO(r.last_date),
         last_date_local: formatDateLocal(req, r.last_date),
         count: r.count,
