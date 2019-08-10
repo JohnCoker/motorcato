@@ -26,6 +26,9 @@ create table notifications (
 create type motor_type as enum (
  'SU', 'reload', 'hybrid'
 );
+create type report_status as enum (
+ 'pending', 'accepted', 'rejected'
+);
 create table reports (
   id serial primary key,
   created_at timestamp not null default now(),
@@ -65,7 +68,7 @@ create table reports (
   reporter_tra text,
   reporter_ukra text,
   old_id integer,
-  rejected boolean not null default false
+  status report_status not null default 'pending'
 );
 create table photos (
   id serial primary key,

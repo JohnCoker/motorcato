@@ -331,9 +331,10 @@ fs.createReadStream(infile)
       }
     });
     if (missing) {
-      cols.rejected = 'true';
+      cols.status = "'rejected'";
       rejected++;
-    }
+    } else
+      cols.status = "'accepted'";
     out.write('insert into reports (');
     Object.keys(cols).forEach((c, i) => {
       if (i > 0)

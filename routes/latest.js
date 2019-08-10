@@ -10,14 +10,14 @@ select manufacturer, common_name, motor_type, max(failure_date) as last_date, co
 `;
 
 const LastFailuresQuery = `${LatestSelect}
- where not rejected and failure_date >= now() - interval '90 days'
+ where status != 'rejected' and failure_date >= now() - interval '90 days'
  group by 1, 2, 3
  order by 4 desc, 5 desc, 1, 2, 3
  limit 25
 `;
 
 const MostFailuresQuery = `${LatestSelect}
- where not rejected
+ where status != 'rejected'
  group by 1, 2, 3
  having count(*) > 1
  order by 5 desc, 4 desc, 1, 2, 3

@@ -8,8 +8,7 @@ block content
     table(id="results").results.table.dt-responsive.nowrap
       thead
         tr
-          th(data-priority="9" title="failure report details")
-            i.far.fa-clipboard
+          th(data-priority="9" title="failure report details") Report
           th(data-priority="5" title="motor manufacturer") Manufacturer
           th(data-priority="5" title="common name of motor") Motor
           th(data-priority="3" title="motor type") Type
@@ -20,8 +19,7 @@ block content
         each row in results
           tr
             td(title="details of this failure report")
-              a(href=row.id_search)
-                i.far.fa-clipboard
+              a(href=row.id_search) Report
             td(title="all failures for this manufacturer")
               a(href=row.manufacturer_search)= row.manufacturer
             td(title="all failures for this motor")

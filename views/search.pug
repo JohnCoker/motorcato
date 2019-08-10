@@ -17,18 +17,18 @@ block content
 
   form(method="post", action="/search").search
     .form-row
-      .form-col.col-md-4
+      .form-col.col.col-md-4
         .form-group
           label(for="manufacturer") Manufacturer
           select(name="manufacturer").form-control
             option(value="") (all)
             each mfr in manufacturers
               option(selected=(criteria.manufacturer == mfr))= mfr
-      .form-col.col-md-4
+      .form-col.col.col-md-4
         .form-group
           label(for="name") Designation
           input(type="text", name="name" value=criteria.name).form-control
-      .form-col.col-md-4
+      .form-col.col.col-md-4
         .form-group
           label(for="motor_type") Type
           select(name="motor_type").form-control
@@ -56,6 +56,15 @@ block content
         .form-group
           label(for="serial_no") Date code
           input(type="text" name="serial_no" value=criteria.serial_no).form-control
+      if admin
+        .form-col.col.col-md-4
+          .form-group
+            label(for="status") Status
+            select(name="status").form-control
+              option(value="") (all)
+              option(value="SU" selected=(criteria.status == 'pending')) pending
+              option(selected=(criteria.status == 'accepted')) accepted
+              option(selected=(criteria.status == 'rejected')) rejected
 
     .form-row
       .form-col.col

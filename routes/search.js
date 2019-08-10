@@ -87,8 +87,7 @@ const FailureCols = [];
     type: "bool",
   },
   {
-    col: "rejected",
-    type: "bool",
+    col: "status",
   },
 ].forEach(info => {
   SearchCols[info.col] = info;
@@ -205,8 +204,8 @@ function searchPage(req, res, next, params) {
       comparisons = comparisons.filter(sql => !/^fail_/.test(sql));
       comparisons.push("(" + fails.join(" or ") + ")");
     }
-    if (!byId && keys.indexOf('rejected') < 0)
-      comparisons.push("not rejected");
+    if (!byId && keys.indexOf('status') < 0)
+      comparisons.push("status != 'rejected'");
 
     let where = "\n where " + comparisons.join("\n       and ");
     let select = ("select * from reports" +

@@ -53,8 +53,16 @@ router.all('*', function(req, res, next) {
 });
 
 router.get('/', function(req, res, next) {
-  res.render('admin/admin', {
-    title: 'Site Administration',
+  let select = "select count(*) from reports where status = 'pending'";
+  req.pool.query(select, (err, q) => {
+    if (err)
+      return next(err);
+
+    let count = q.rows[0].count;
+    res.render('admin/admin', {
+      title: 'Site Administration',
+      pending_count: count,
+    });
   });
 });
 
@@ -264,7 +272,25 @@ router.get('/reject', function(req, res, next) {
   if (id == null || id === '' || !/^\d+$/.test(id)) {
     res.redirect(302, "/search?notfound");
   } else {
-    let update = "update reports set rejected = true where id = " + id;
+    let update = "update reports set status = 'rejected' where id = " + id;
+    req.pool.query(update, (err, q) => {
+      if (err)
+        return next(err);
+
+      res.redirect(302, "/search?id=" + id);
+    });
+  }
+});
+
+/*
+ * Accept a failure report.
+ */
+router.get('/accept', function(req, res, next) {
+  let id = req.query.id;
+  if (id == null || id === '' || !/^\d+$/.test(id)) {
+    res.redirect(302, "/search?notfound");
+  } else {
+    let update = "update reports set status = 'accepted' where id = " + id;
     req.pool.query(update, (err, q) => {
       if (err)
         return next(err);

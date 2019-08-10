@@ -62,7 +62,7 @@ router.use(express.json());
  */
 function manufacturers(req, res, method, params) {
   let select = ("select manufacturer, count(*), max(failure_date) as failure_date from reports" +
-                " where not rejected" +
+                " where status != 'rejected'" +
                 " group by 1" +
                 " order by 1");
   req.pool.query(select, (err, q) => {
@@ -112,7 +112,7 @@ function motor(req, res, method, params) {
 
   let select = ("select count(*), max(failure_date) as failure_date from reports" +
                 " where manufacturer = " + quoteSqlStr(mfr) + " and common_name = " + quoteSqlStr(name) +
-                " and not rejected");
+                " and status != 'rejected'");
   req.pool.query(select, (err, q) => {
     if (err)
       return error(req, res, params, ServerError, 'Unable to query database.');

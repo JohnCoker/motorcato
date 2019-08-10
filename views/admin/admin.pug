@@ -6,6 +6,9 @@ block content
   p These pages are devoted to adminstration of the site itself.
   ul
     li
+      a(href="/search?status=pending") View pending reports
+      |  (#{pending_count} pending)
+    li
       a(href="/admin/notifications") Manage notifications
       |  (displayed on home page)
     li
@@ -15,7 +18,8 @@ block content
       a(href="/admin/invite") Invite a new administrator
 
   p
-    | Also as an administrator you can see more details of failure reports as well as "reject" bogus entries.
+    | Also as an administrator you can see more details of failure reports as well as "reject" bogus entries and 
+    | "accept" valid ones. 
     | (You will see this when viewing details of a failure report from the 
     a(href="/search") search page
     | .)
