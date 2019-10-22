@@ -6,7 +6,7 @@
   "author": "John Coker <john@jcsw.com> (http://johncoker.com/)",
   "license": "Unlicense",
   "dependencies": {
-    "csv-parse": "^4.4.1",
+    "csv-parse": "^4.4.6",
     "pg": "^7.10.0"
   }
 }
