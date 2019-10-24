@@ -52,13 +52,21 @@ function convertDate(v) {
       month++;
     } else {
       month = parseInt(m);
-      if (isNaN(month) || !(month > 0) || month > 12)
+      if (isNaN(month) || !(month > 0))
         return;
     }
 
     day = parseInt(d);
     if (isNaN(day) || !(day > 0) || day > 31)
       return;
+    if (month > 12) {
+      if (day <= 12 && month <= 31) {
+        var t = day;
+        day = month;
+        month = t;
+      } else
+        return;
+    }
 
     function pad2(n) {
       var s = '';
