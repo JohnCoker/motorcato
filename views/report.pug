@@ -75,8 +75,8 @@ block content
         .form-group
           label(for="failure_date")
             | Date of Failure
-            i(data-content="The date the motor (engine) was used").help-simple
-          input(type="date" name="failure_date" value=failure_date).form-control
+            i(data-content="The date the motor (engine) was used, format YYYY-MM-DD").help-simple
+          input(type="date" placeholder="YYYY-MM-DD" name="failure_date" value=failure_date).form-control
       .form-col.col-md-4
         .form-group
           label(for="location")

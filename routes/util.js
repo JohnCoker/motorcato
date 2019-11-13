@@ -110,6 +110,7 @@ function loadMfrNames() {
                   if (mfrs && mfrs.length == 1 && mfrs[0].manufacturer.length > 0)
                     MfrList = mfrs[0].manufacturer.map(o => o._);
                   MfrQueried = now;
+                  MfrList.sort();
                   resolve(MfrList);
                 });
               });
