@@ -128,8 +128,7 @@ const FailureCols = [];
   SearchCols[info.col] = info;
 })();
 
-const Limit = 50;
-const LimitPlus = Limit + Math.ceil(Limit / 10);
+const DefaultLimit = 50;
 
 function searchPage(req, res, next, params) {
   let props = {
@@ -143,7 +142,7 @@ function searchPage(req, res, next, params) {
     admin: req.session && req.session.authenticated || false,
   };
 
-  let keys = [], comparisons = [], byId = false;
+  let keys = [], comparisons = [], byId = false, offset = 0, limit = DefaultLimit, query;
   if (params != null) {
     function compareOp(key) {
       let op = params[key + '_compare'];
@@ -153,9 +152,9 @@ function searchPage(req, res, next, params) {
     }
     keys = Object.keys(params);
     keys.forEach(key => {
-      let info = SearchCols[key];
+      let info = SearchCols[key],
+          value = params[key];
       if (info) {
-        let value = params[key];
         if (info.sql) {
           let sql = info.sql(value);
           if (sql) {
@@ -172,7 +171,8 @@ function searchPage(req, res, next, params) {
             comparisons.push(info.col + " " + compare + " '" + value.format("YYYY-MM-DD") + "'");
             props.criteria[key] = value;
             props.criteria[key + '_compare'] = compare;
-          }
+          } else
+            value = null;
         } else if (info.type == 'int') {
           value = parseInt(value);
           if (!isNaN(value)) {
@@ -194,9 +194,26 @@ function searchPage(req, res, next, params) {
         }
         if (info.id)
           byId = true;
+        if (value != null && value !== '') {
+          if (query == null)
+            query = '?';
+          else
+            query += '&';
+          query += key + '=' + encodeURIComponent(value);
+        }
+      } else if (key == 'limit') {
+        limit = parseInt(value);
+        if (isNaN(limit) || !isFinite(limit))
+          limit = DefaultLimit;
+      } else if (key == 'offset') {
+        offset = parseInt(value);
+        if (isNaN(offset) || !isFinite(offset))
+          offset = 0;
       }
     });
   }
+  if (query)
+    props.queryUrl = '/search' + query;
 
   if (comparisons.length > 0) {
     let fails = comparisons.filter(sql => /^fail_/.test(sql));
@@ -210,8 +227,14 @@ function searchPage(req, res, next, params) {
     let where = "\n where " + comparisons.join("\n       and ");
     let select = ("select * from reports" +
                   where +
-                  "\n order by failure_date desc, manufacturer, common_name" +
-                  "\n limit " + (LimitPlus + 1).toFixed());
+                  "\n order by failure_date desc, manufacturer, common_name");
+    if (offset > 0)
+      select += "\n offset " + offset.toFixed();
+    var limitPlus = 0;
+    if (limit > 0) {
+      limitPlus = Math.ceil(limit * 1.1);
+      select += "\n limit " + (limitPlus + 1).toFixed();
+    }
     req.pool.query(select, (err, q) => {
       if (err)
         return next(err);
@@ -273,11 +296,15 @@ function searchPage(req, res, next, params) {
         });
       } else if (props.results.length > 1) {
         props.title = 'Search Results';
-        if (props.results.length > LimitPlus) {
-          props.results.length = Limit;
-          props.result_count = Limit.toFixed();
+        props.limit = limit;
+        props.offset = offset;
+        if (limitPlus > 0 && props.results.length > limitPlus) {
+          props.results.length = limit;
+          props.result_count = limit;
           props.total_count += '+';
           props.more = true;
+          props.allUrl = props.queryUrl + '&limit=-1';
+          props.moreUrl = props.queryUrl + '&offset=' + (offset + limit).toFixed();
 
           let count = "select count(*) from reports" + where;
           req.pool.query(count, (err, q) => {

@@ -36,11 +36,22 @@ block content
 
   p
     | Showing 
-    if more
-      | #{result_count} of #{total_count}
+    if offset > 0
+      | #{offset + 1} to #{offset + result_count} of #{total_count}
+    else if more
+      | first #{result_count} of #{total_count}
     else
       | all #{result_count}
-    |  results;
+    |  results; 
+    if moreUrl
+      a(href=moreUrl) more results
+      | , 
+    if allUrl
+      a(href=allUrl) all results
+      | , 
+    if queryUrl
+      a(href=queryUrl) shareable link
+      | , 
     | back up to 
     a(href='#top') the top
     | .
