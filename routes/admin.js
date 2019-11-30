@@ -166,7 +166,6 @@ Do not reply to this email; it was sent automatically.
 Malfunctioning Engine Statistical Survey • PO Box 407 • Marion, IA 52302`
           }).then(() => res.render('admin/forgot', props))
             .catch(e => next(e));
-    res.render('admin/invite', props);
         });
       } else {
         res.render('admin/forgot', props);
