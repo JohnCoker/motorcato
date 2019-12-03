@@ -4,6 +4,8 @@ block content
   h1= title
 
   a(name='top')
+  if chartUrl != null
+    img(src=chartUrl alt="frequency" title="report frequency over time")
   .table-responsive
     table(id="results").results.table.dt-responsive.nowrap
       thead

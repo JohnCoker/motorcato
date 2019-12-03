@@ -1,132 +1,11 @@
 const express = require('express'),
       router = express.Router(),
-      moment = require('moment'),
       { LargeObjectManager } = require('pg-large-object'),
-      quoteSqlStr = require('./util.js').quoteSqlStr,
       searchURL = require('./util.js').searchURL,
       formatDateISO = require('./util.js').formatDateISO,
       formatDateLocal = require('./util.js').formatDateLocal,
-      loadMfrNames = require('./util.js').loadMfrNames;
-
-const SearchCols = {};
-const FailureCols = [];
-[
-  {
-    col: "id",
-    type: "int",
-    id: true,
-  },
-  {
-    col: "old_id",
-    type: "int",
-    id: true,
-  },
-  {
-    col: "manufacturer",
-    aliases: ["mfr"],
-  },
-  {
-    col: "designation",
-    aliases: ["enginecode"],
-  },
-  {
-    col: "common_name",
-    aliases: ["motor", "name"],
-  },
-  {
-    col: "motor_type",
-    aliases: ["type"],
-  },
-  {
-    col: "serial_no",
-    aliases: ["code"],
-  },
-  {
-    col: "failure_date",
-    aliases: ["date"],
-    type: "date",
-  },
-  {
-    col: "fail_nozzle_blown",
-    aliases: ["nozzle_blown"],
-    type: "bool",
-  },
-  {
-    col: "fail_ejection_blown",
-    aliases: ["ejection_blown"],
-    type: "bool",
-  },
-  {
-    col: "fail_casing_split",
-    aliases: ["casing_split"],
-    type: "bool",
-  },
-  {
-    col: "fail_propellant_ejected",
-    aliases: ["propellant_ejected"],
-    type: "bool",
-  },
-  {
-    col: "fail_burn_through",
-    aliases: ["burn_through"],
-    type: "bool",
-  },
-  {
-    col: "fail_no_ejection",
-    aliases: ["no_ejection"],
-    type: "bool",
-  },
-  {
-    col: "fail_bad_delay",
-    aliases: ["bad_delay"],
-    type: "bool",
-  },
-  {
-    col: "fail_other",
-    aliases: ["other"],
-    type: "bool",
-  },
-  {
-    col: "status",
-  },
-].forEach(info => {
-  SearchCols[info.col] = info;
-  if (info.aliases)
-    info.aliases.forEach(alias => SearchCols[info.col] = info);
-  if (/^fail_/.test(info.col))
-    FailureCols.push(info);
-});
-(function() {
-  let info = {
-    col: "fail_unknown",
-    type: "bool",
-    sql: v => {
-      let sql = "(";
-      FailureCols.forEach((info, i) => {
-        if (i > 0)
-          sql += " and ";
-        sql += " not " + info.col;
-      });
-      sql += ")";
-      return sql;
-    }
-  };
-  SearchCols[info.col] = info;
-
-  info = {
-    col: "name",
-    type: "bool",
-    sql: v => {
-      if (v == null || v === '')
-        return;
-      if (v == 'null')
-        return 'common_name is null';
-      else
-        return '(common_name = upper(' + quoteSqlStr(v) + ') or designation ilike ' + quoteSqlStr('%' + v + '%') + ')';
-    }
-  };
-  SearchCols[info.col] = info;
-})();
+      loadMfrNames = require('./util.js').loadMfrNames,
+      searchQuery = require('./util.js').searchQuery;
 
 const DefaultLimit = 50;
 
@@ -134,99 +13,31 @@ function searchPage(req, res, next, params) {
   let props = {
     title: 'Search Reports',
     searched: false,
-    criteria: {
-      failure_date_compare: '>=',
-    },
     results: [],
     errors: [],
     admin: req.session && req.session.authenticated || false,
   };
 
-  let keys = [], comparisons = [], byId = false, offset = 0, limit = DefaultLimit, query;
-  if (params != null) {
-    function compareOp(key) {
-      let op = params[key + '_compare'];
-      if (op == null || op === '' || !/^[<>]?=?$/.test(op))
-        op = "=";
-      return op;
-    }
-    keys = Object.keys(params);
-    keys.forEach(key => {
-      let info = SearchCols[key],
-          value = params[key];
-      if (info) {
-        if (info.sql) {
-          let sql = info.sql(value);
-          if (sql) {
-            comparisons.push(sql);
-            props.criteria[key] = value;
-          }
-        } else if (value == 'null') {
-          comparisons.push(info.col + " is null");
-          props.criteria[key] = 'null';
-        } else if (info.type == 'date') {
-          value = moment(value, 'YYYY-M-D', true);
-          if (value.isValid()) {
-            let compare = compareOp(key);
-            comparisons.push(info.col + " " + compare + " '" + value.format("YYYY-MM-DD") + "'");
-            props.criteria[key] = value;
-            props.criteria[key + '_compare'] = compare;
-          } else
-            value = null;
-        } else if (info.type == 'int') {
-          value = parseInt(value);
-          if (!isNaN(value)) {
-            let compare = compareOp(key);
-            comparisons.push(info.col + " " + compare + " " + value.toFixed());
-            props.criteria[key] = value;
-            props.criteria[key + '_compare'] = compare;
-          }
-        } else if (info.type == 'bool') {
-          if (value === 'false')
-            comparisons.push("not " + info.col);
-          else {
-            comparisons.push(info.col);
-            props.criteria[key] = true;
-          }
-        } else if (value != null && value !== '') {
-          comparisons.push(info.col + " = " + quoteSqlStr(value));
-          props.criteria[key] = value;
-        }
-        if (info.id)
-          byId = true;
-        if (value != null && value !== '') {
-          if (query == null)
-            query = '?';
-          else
-            query += '&';
-          query += key + '=' + encodeURIComponent(value);
-        }
-      } else if (key == 'limit') {
-        limit = parseInt(value);
-        if (isNaN(limit) || !isFinite(limit))
-          limit = DefaultLimit;
-      } else if (key == 'offset') {
-        offset = parseInt(value);
-        if (isNaN(offset) || !isFinite(offset))
-          offset = 0;
-      }
-    });
-  }
-  if (query)
-    props.queryUrl = '/search' + query;
+  let search = searchQuery(req, res, params);
+  props.criteria = search.criteria;
+  if (search.comparisons.length > 0) {
+    if (search.query)
+      props.queryUrl = '/search' + search.query;
 
-  if (comparisons.length > 0) {
-    let fails = comparisons.filter(sql => /^fail_/.test(sql));
-    if (fails.length > 1) {
-      comparisons = comparisons.filter(sql => !/^fail_/.test(sql));
-      comparisons.push("(" + fails.join(" or ") + ")");
+    let offset = 0, limit = DefaultLimit;
+    if (params.limit != null) {
+      limit = parseInt(params.limit);
+      if (isNaN(limit) || !isFinite(limit))
+        limit = DefaultLimit;
     }
-    if (!byId && keys.indexOf('status') < 0)
-      comparisons.push("status != 'rejected'");
+    if (params.offset != null) {
+      offset = parseInt(params.offset);
+      if (isNaN(offset) || !isFinite(offset) || offset < 0)
+        offset = 0;
+    }
 
-    let where = "\n where " + comparisons.join("\n       and ");
     let select = ("select * from reports" +
-                  where +
+                  search.where +
                   "\n order by failure_date desc, manufacturer, common_name");
     if (offset > 0)
       select += "\n offset " + offset.toFixed();
@@ -261,7 +72,7 @@ function searchPage(req, res, next, params) {
         });
 
         let fail_all = [];
-        FailureCols.forEach(info => {
+        search.FailureCols.forEach(info => {
           if (r[info.col] === true)
             fail_all.push(info.col);
         });
@@ -272,8 +83,8 @@ function searchPage(req, res, next, params) {
 
         props.results.push(result);
       });
-      props.result_count = props.results.length.toFixed();
-      props.total_count = props.results.length.toFixed();
+      props.result_count = props.results.length;
+      props.total_count = offset + props.results.length;
 
       if (props.results.length == 1) {
         props.title = 'Search Result';
@@ -298,6 +109,8 @@ function searchPage(req, res, next, params) {
         props.title = 'Search Results';
         props.limit = limit;
         props.offset = offset;
+        if (props.results.length >= 10)
+          props.chartUrl = '/chart.svg' + search.query;
         if (limitPlus > 0 && props.results.length > limitPlus) {
           props.results.length = limit;
           props.result_count = limit;
@@ -306,7 +119,7 @@ function searchPage(req, res, next, params) {
           props.allUrl = props.queryUrl + '&limit=-1';
           props.moreUrl = props.queryUrl + '&offset=' + (offset + limit).toFixed();
 
-          let count = "select count(*) from reports" + where;
+          let count = "select count(*) from reports" + search.where;
           req.pool.query(count, (err, q) => {
             if (!err)
               props.total_count = q.rows[0].count;

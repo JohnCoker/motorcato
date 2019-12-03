@@ -159,20 +159,233 @@ function commonName(desig) {
     return m[2].toUpperCase() + m[3];
 }
 
+const SearchCols = {};
+const FailureCols = [];
+[
+  {
+    col: "id",
+    type: "int",
+    id: true,
+  },
+  {
+    col: "old_id",
+    type: "int",
+    id: true,
+  },
+  {
+    col: "manufacturer",
+    aliases: ["mfr"],
+  },
+  {
+    col: "designation",
+    aliases: ["enginecode"],
+  },
+  {
+    col: "common_name",
+    aliases: ["motor", "name"],
+  },
+  {
+    col: "motor_type",
+    aliases: ["type"],
+  },
+  {
+    col: "serial_no",
+    aliases: ["code"],
+  },
+  {
+    col: "failure_date",
+    aliases: ["date"],
+    type: "date",
+  },
+  {
+    col: "fail_nozzle_blown",
+    aliases: ["nozzle_blown"],
+    type: "bool",
+  },
+  {
+    col: "fail_ejection_blown",
+    aliases: ["ejection_blown"],
+    type: "bool",
+  },
+  {
+    col: "fail_casing_split",
+    aliases: ["casing_split"],
+    type: "bool",
+  },
+  {
+    col: "fail_propellant_ejected",
+    aliases: ["propellant_ejected"],
+    type: "bool",
+  },
+  {
+    col: "fail_burn_through",
+    aliases: ["burn_through"],
+    type: "bool",
+  },
+  {
+    col: "fail_no_ejection",
+    aliases: ["no_ejection"],
+    type: "bool",
+  },
+  {
+    col: "fail_bad_delay",
+    aliases: ["bad_delay"],
+    type: "bool",
+  },
+  {
+    col: "fail_other",
+    aliases: ["other"],
+    type: "bool",
+  },
+  {
+    col: "status",
+  },
+].forEach(info => {
+  SearchCols[info.col] = info;
+  if (info.aliases)
+    info.aliases.forEach(alias => SearchCols[info.col] = info);
+  if (/^fail_/.test(info.col))
+    FailureCols.push(info);
+});
+(function() {
+  let info = {
+    col: "fail_unknown",
+    type: "bool",
+    sql: v => {
+      let sql = "(";
+      FailureCols.forEach((info, i) => {
+        if (i > 0)
+          sql += " and ";
+        sql += " not " + info.col;
+      });
+      sql += ")";
+      return sql;
+    }
+  };
+  SearchCols[info.col] = info;
+
+  info = {
+    col: "name",
+    type: "bool",
+    sql: v => {
+      if (v == null || v === '')
+        return;
+      if (v == 'null')
+        return 'common_name is null';
+      else
+        return '(common_name = upper(' + quoteSqlStr(v) + ') or designation ilike ' + quoteSqlStr('%' + v + '%') + ')';
+    }
+  };
+  SearchCols[info.col] = info;
+})();
+
+function searchQuery(req, res, params) {
+  let keys = [],
+      criteria = { failure_date_compare: '>=' },
+      comparisons = [],
+      byId = false,
+      query;
+
+  if (params != null) {
+    function compareOp(key) {
+      let op = params[key + '_compare'];
+      if (op == null || op === '' || !/^[<>]?=?$/.test(op))
+        op = "=";
+      return op;
+    }
+    keys = Object.keys(params);
+    keys.forEach(key => {
+      let info = SearchCols[key],
+          value = params[key];
+      if (info) {
+        let compare;
+        if (info.sql) {
+          let sql = info.sql(value);
+          if (sql) {
+            comparisons.push(sql);
+            criteria[key] = value;
+          }
+        } else if (value == 'null') {
+          comparisons.push(info.col + " is null");
+          criteria[key] = 'null';
+        } else if (info.type == 'date') {
+          value = moment(value, 'YYYY-M-D', true);
+          if (value.isValid()) {
+            compare = compareOp(key);
+            comparisons.push(info.col + " " + compare + " '" + value.format("YYYY-MM-DD") + "'");
+            criteria[key] = value;
+            criteria[key + '_compare'] = compare;
+          } else
+            value = null;
+        } else if (info.type == 'int') {
+          value = parseInt(value);
+          if (!isNaN(value)) {
+            compare = compareOp(key);
+            comparisons.push(info.col + " " + compare + " " + value.toFixed());
+            criteria[key] = value;
+            criteria[key + '_compare'] = compare;
+          } else
+            value = null;
+        } else if (info.type == 'bool') {
+          if (value === 'false')
+            comparisons.push("not " + info.col);
+          else {
+            value = true;
+            comparisons.push(info.col);
+            criteria[key] = true;
+          }
+        } else if (value != null && value !== '') {
+          comparisons.push(info.col + " = " + quoteSqlStr(value));
+          criteria[key] = value;
+        }
+        if (info.id)
+          byId = true;
+        if (value != null && value !== '') {
+          if (query == null)
+            query = '?';
+          else
+            query += '&';
+          let text = value;
+          if (info.type == 'date')
+            text = formatDateISO(value);
+          query += key + '=' + encodeURIComponent(text);
+          if (compare != null)
+            query += '&' + key + '_compare=' + encodeURIComponent(compare);
+        }
+      }
+    });
+  }
+
+  let result = { SearchCols, FailureCols, criteria, query, comparisons };
+  if (comparisons.length > 0) {
+    let fails = comparisons.filter(sql => /^fail_/.test(sql));
+    if (fails.length > 1) {
+      comparisons = comparisons.filter(sql => !/^fail_/.test(sql));
+      comparisons.push("(" + fails.join(" or ") + ")");
+    }
+    if (!byId && keys.indexOf('status') < 0)
+      comparisons.push("status != 'rejected'");
+
+    result.where = "\n where " + comparisons.join("\n       and ");
+  }
+  return result;
+}
+
 module.exports = {
-  isEmpty: isEmpty,
-  nonEmpty: nonEmpty,
-  integer: integer,
-  posInteger: posInteger,
-  posNumber: posNumber,
-  quoteSqlStr: quoteSqlStr,
-  searchURL: searchURL,
-  parseDateISO: parseDateISO,
-  formatDateISO: formatDateISO,
-  formatDateLocal: formatDateLocal,
-  loadMfrNames: loadMfrNames,
-  originURL: originURL,
-  rowId: rowId,
-  formatSize: formatSize,
-  commonName: commonName,
+  isEmpty,
+  nonEmpty,
+  integer,
+  posInteger,
+  posNumber,
+  quoteSqlStr,
+  searchURL,
+  parseDateISO,
+  formatDateISO,
+  formatDateLocal,
+  loadMfrNames,
+  originURL,
+  rowId,
+  formatSize,
+  commonName,
+  searchQuery,
 };
