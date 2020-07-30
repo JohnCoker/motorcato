@@ -152,6 +152,7 @@ router.post('/search', function(req, res, next) {
 router.get('/photo/:id', function(req, res, next) {
   if (req.params.id == null || req.params.id === '')
     return next();
+  return next();
   req.pool.connect((err, client, release) => {
     if (err)
       return next(err);
