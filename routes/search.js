@@ -118,6 +118,7 @@ function searchPage(req, res, next, params) {
           props.more = true;
           props.allUrl = props.queryUrl + '&limit=-1';
           props.moreUrl = props.queryUrl + '&offset=' + (offset + limit).toFixed();
+          props.csvUrl = '/search.csv' + search.query;
 
           let count = "select count(*) from reports" + search.where;
           req.pool.query(count, (err, q) => {
@@ -147,6 +148,91 @@ router.get(['/search', '/search.html'], function(req, res, next) {
 });
 router.post('/search', function(req, res, next) {
   searchPage(req, res, next, req.body);
+});
+
+function searchCSV(req, res, next, params) {
+  const admin = req.session && req.session.authenticated;
+  let search = searchQuery(req, res, params);
+  let select = ("select * from reports" +
+                search.where +
+                "\n order by failure_date desc, manufacturer, common_name");
+  req.pool.query(select, (err, q) => {
+    if (err)
+      return next(err);
+
+    function skip(col) {
+      if (col === 'id' || col === 'created_at' || col === 'old_id')
+        return true;
+      if (/^reporter_/.test(col) && !admin)
+        return true;
+      return false;
+    }
+
+    function csv(value) {
+      if (value == null)
+        value = '';
+      else if (typeof value == 'boolean')
+        value = value ? 'true' : '';
+      else
+        value = String(value);
+      let s;
+      if (/[,\s"\\]/.test(value)) {
+        return '"' + value.replace(/["\\]/g, '$&$&') + '"';
+      } else {
+        return value;
+      }
+    }
+
+    res.type('text/csv')
+       .attachment('reports.csv');
+
+    let line = '', shown = 0;
+    q.fields.forEach((f, i) => {
+      if (skip(f.name))
+        return;
+
+      if (shown > 0)
+        line += ',';
+      line += '"';
+      f.name.split('_').forEach((w, i) => {
+        if (i > 0)
+          line += ' ';
+        line += w.charAt(0).toUpperCase();
+        line += w.substring(1);
+      });
+      line += '"';
+      shown++;
+    });
+    res.write(line + '\r\n');
+
+    q.rows.forEach((r, i) => {
+      line = '';
+      shown = 0;
+      Object.keys(r).forEach((col, i) => {
+        if (skip(col))
+          return;
+
+        let value = r[col];
+        if (/_date$/.test(col))
+          value = formatDateISO(value);
+
+        if (shown > 0)
+          line += ',';
+        line += csv(value);
+        shown++;
+      });
+      res.write(line + '\r\n');
+    });
+
+    res.end();
+  });
+}
+
+router.get('/search.csv', function(req, res, next) {
+  searchCSV(req, res, next, req.query);
+});
+router.post('/search.csv', function(req, res, next) {
+  searchCSV(req, res, next, req.body);
 });
 
 router.get('/photo/:id', function(req, res, next) {
