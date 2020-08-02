@@ -102,7 +102,11 @@ router.get('/document/:name', function(req, res, next) {
           }
           res.type(r.content_type)
              .set('Content-Length', size);
-          stream.on('readable', () => res.write(stream.read()))
+          stream.on('readable', () => {
+                  let b = stream.read();
+                  if (b != null)
+                    res.write(b);
+                })
                 .on('end', () => {
                   res.end();
                   client.query('commit', release);

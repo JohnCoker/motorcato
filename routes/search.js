@@ -238,7 +238,6 @@ router.post('/search.csv', function(req, res, next) {
 router.get('/photo/:id', function(req, res, next) {
   if (req.params.id == null || req.params.id === '')
     return next();
-  return next();
   req.pool.connect((err, client, release) => {
     if (err)
       return next(err);
@@ -268,7 +267,11 @@ router.get('/photo/:id', function(req, res, next) {
           }
           res.type(r.content_type)
              .set('Content-Length', size);
-          stream.on('readable', () => res.write(stream.read()))
+          stream.on('readable', () => {
+                  let b = stream.read();
+                  if (b != null)
+                    res.write(b);
+                })
                 .on('end', () => {
                   res.end();
                   client.query('commit', release);
