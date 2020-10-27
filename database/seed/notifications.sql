@@ -63,3 +63,21 @@ values ('Bulletin_Pro38_1G_Pellet_Issue_v1.2.pdf', 'application/pdf', 1, :LASTOI
 insert into notifications (date, headline, posted_by, document_name)
 values ('2019-04-15', 'Cesaroni Bulletin: 1G Failures', 1, 'Bulletin_Pro38_1G_Pellet_Issue_v1.2.pdf')
 ;
+
+insert into notifications (date, headline, posted_by, body)
+values ('2020-10-01', 'Pro29 3G Mellow Failures', 1,
+'It has been brought to the attention of Cesaroni Technology Inc over the past few weeks that there has been a high
+failure rate on Pro29-3G Mellow reloads. We have been looking into this matter and have verified the anomaly
+which stems from an over-pressurization at ignition resulting in nozzle and/or forward closure blowouts.
+Upon investigation it appears the cause is primarily due to an overly large ignition pellet. The issue is only in this one
+specific motor/reload (i.e. 143G33-9A), the rest of the Pro29 lineup is unaffected.
+Unfortunately, it appears the pellet supplied during assembly of the Pro 29-3G mellow reload was too large. Due to
+the small throat of the nozzle in combination with the excess gas flow from the pellet, this can cause an over
+pressurization of the motor resulting in failure. CTI has already made corrective measures for all reloads/motors sent
+to dealers from October 1, 2020 onwards.
+
+Full announcement:
+http://www.pro38.com/pdfs/Bulletin-Pro29_%203G_Mellow_Pellet_Issue_v1.1.pdf
+
+Pellet modification instructions:
+http://www.pro38.com/pdfs/Bulletin-Pro29_%203G_Mellow_Pellet_Issue_v1.1.pdf');
