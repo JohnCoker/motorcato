@@ -81,3 +81,13 @@ http://www.pro38.com/pdfs/Bulletin-Pro29_%203G_Mellow_Pellet_Issue_v1.1.pdf
 
 Pellet modification instructions:
 http://www.pro38.com/pdfs/Bulletin-Pro29_%203G_Mellow_Pellet_Issue_v1.1.pdf');
+
+insert into notifications (date, headline, posted_by, body)
+values ('2020-10-29', 'Aerotech I170G Delay Length', 1,
+'TMT has been working with Aerotech to clear up some confusion about the length of the unmodified delay element on the Aerotech I170G, a one-grain 54mm reload kit designed for the 54/426 hardware. We have found that the reload kits sold until the present time have been released with a 10 second unmodified delay element, instead of the labeled 14 seconds. This error includes all of the I170G kits with lot codes up to and including 051220-07. AT estimates that approximately 70 of these reload kits have been sold to dealers. They are working to inform all users and dealers about this problem, in the AT catalogue, and on their facebook page.
+
+And, since all of the other 54/426 reloads have 14 second unmodified delay elements, all future I170G packages leaving the factory will contain 14 second delay elements. This will include all motors with the lot code 072220-07 and all lots with later manufacturing dates.
+IF you have any I170G reload kits in your box, please check the lot codes and make sure you know the delay element timing for your specific kit.
+
+Alan Whitmore
+Chair, TMT');
