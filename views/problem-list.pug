@@ -1,0 +1,35 @@
+extends layout
+
+block content
+  h1= title
+
+  style(type="text/css")
+    | td.trigger, th.trigger { text-align: center; }
+    | td.total, th.total { text-align: right; padding-right: 1em; }
+
+  each error in errors
+    div(role="alert").alert.alert-warning= error
+
+  table.table.table-sm
+    thead
+      tr
+        th Motor
+        th.trigger Trigger
+        th.total Total
+        th Years with Failures
+    tbody
+      each motor in motors
+        tr
+          td
+            a(href='/search?manufacturer=' + motor.manufacturer + '&name=' + motor.common_name)= motor.label
+          td.trigger(class=motor.trigger == 2 ? 'alert alert-danger' : motor.trigger == 1 ? 'alert alert-warning' : '')= motor.trigger
+          td.total= motor.totalFailures
+          td
+            each year, index in motor.years
+              if index
+                span , 
+              =year.year + ' (' + year.count + ')'
+
+  p Use the back button to adjust your inputs or 
+    a(href="/problem") start over
+    ='.'

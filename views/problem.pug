@@ -1,0 +1,112 @@
+extends layout
+
+block content
+  h1= title
+
+  style(type="text/css")
+    | td.report, th.report { text-align: center; }
+    | td.count, th.count { text-align: right; }
+    | td.count { text-align: right; padding-right: 1.7em; }
+    | input[type=number] { width: 80px; }
+    | .form-row.head { font-weight: bold; padding: 0.4em 0; border-bottom: 2px solid #dee2e6; border-top: 1px solid #dee2e6; }
+    | .form-row.body { padding: 0.3em 0; }
+    | .form-row.body { border-bottom: 1px solid #dee2e6; }
+    | .form-row.submit { margin-top: 1em; }
+
+  each error in errors
+    div(role="alert").alert.alert-warning= error
+  if searched
+    .alert.alert-info(role="alert") No motors matched your search; try again with broader criteria.
+  else
+    p Find problem motors that need review.
+
+  if buckets
+    h2 Motors with multiple failures in any year
+    table.table.table-sm
+      thead
+        tr
+          th.report Reports
+          th.count Count
+          th Motors
+      tbody
+        each bucket in buckets
+          tr
+            td.report= bucket.label
+            td.count= bucket.nbucket
+            td
+              if bucket.nbucket && bucket.names
+                each name, index in bucket.names
+                  if index
+                    span , 
+                  a(href='/search?name=' + name)= name
+
+  h2 Find motors that need review
+  form(method="post", action="/problem").problem
+    .form-row.head
+      .form-col.col-md-2 Impulse Class
+      .form-col.col-md-2 Events/Year
+      .form-col.col-md-2 Window (Years)
+      .form-col.col-md-2 First Trigger
+      .form-col.col-md-2 Second Trigger
+
+    .form-row.body
+      .form-col.col-sm-2 A – D
+      .form-col.col-sm-2
+        input(type="number" min="1" name="ad_count" value=ad_count)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="ad_window" value=ad_window)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="ad_1st" value=ad_1st)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="ad_2nd" value=ad_2nd)
+        
+    .form-row.body
+      .form-col.col-sm-2 E – G
+      .form-col.col-sm-2
+        input(type="number" min="1" name="eg_count" value=eg_count)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="eg_window" value=eg_window)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="eg_1st" value=eg_1st)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="eg_2nd" value=eg_2nd)
+        
+    .form-row.body
+      .form-col.col-sm-2 H & I
+      .form-col.col-sm-2
+        input(type="number" min="1" name="hi_count" value=hi_count)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="hi_window" value=hi_window)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="hi_1st" value=hi_1st)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="hi_2nd" value=hi_2nd)
+        
+    .form-row.body
+      .form-col.col-sm-2 J & K
+      .form-col.col-sm-2
+        input(type="number" min="1" name="jk_count" value=jk_count)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="jk_window" value=jk_window)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="jk_1st" value=jk_1st)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="jk_2nd" value=jk_2nd)
+        
+    .form-row.body
+      .form-col.col-sm-2 L – O
+      .form-col.col-sm-2
+        input(type="number" min="1" name="lo_count" value=lo_count)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="lo_window" value=lo_window)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="lo_1st" value=lo_1st)
+      .form-col.col-sm-2
+        input(type="number" min="1" name="lo_2nd" value=lo_2nd)
+
+    .form-row.submit
+      .form-col.col
+        button(type="submit").btn.btn-primary Submit
+        span &nbsp;
+        button(type="reset").btn.btn-secondary Reset
+        

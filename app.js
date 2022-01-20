@@ -45,6 +45,7 @@ app.use('/', require('./routes/index'));
 app.use('/', require('./routes/report'));
 app.use('/', require('./routes/latest'));
 app.use('/', require('./routes/search'));
+app.use('/', require('./routes/problem'));
 app.use('/', require('./routes/download'));
 app.use('/', require('./routes/chart'));
 app.use('/admin', require('./routes/admin'));
