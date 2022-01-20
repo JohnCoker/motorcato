@@ -12,7 +12,7 @@ if (connStr == null || connStr === '')
   throw new Error('DATABASE_URL environment variable not set!');
 const pool = new Pool({
   connectionString: connStr,
-  ssl: !/@localhost\//.test(connStr)
+  ssl: /@localhost\//.test(connStr) ? false : { rejectUnauthorized: false },
 });
 
 const app = express();
