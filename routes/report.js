@@ -39,8 +39,17 @@ function reportProps() {
   });
 }
 router.get(['/report', '/report.html'], function(req, res, next) {
-  reportProps().then(props => res.render('report', props))
-               .catch(err => next(err));
+  reportProps().then(props => {
+    if (req.query) {
+      props.manufacturer = nonEmpty(req.query.manufacturer);
+      props.designation = nonEmpty(req.query.designation) || nonEmpty(req.query.motor);
+      props.motor_type = nonEmpty(req.query.motor_type) || nonEmpty(req.query.type);
+      props.reporter_name = nonEmpty(req.query.reporter_name) || nonEmpty(req.query.name);
+      props.reporter_email = nonEmpty(req.query.reporter_email) || nonEmpty(req.query.email);
+    }
+    res.render('report', props);
+  })
+    .catch(err => next(err));
 
 });
 router.post('/report', upload.single('photo'), function(req, res, next) {
