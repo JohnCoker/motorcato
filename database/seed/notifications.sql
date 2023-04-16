@@ -91,3 +91,54 @@ IF you have any I170G reload kits in your box, please check the lot codes and ma
 
 Alan Whitmore
 Chair, TMT');
+
+insert into notifications (date, headline, posted_by, body)
+values ('2022-09-13', 'CTI Pro54 2G LB motors', 1,
+'Pro54 2G LB motors
+
+Sep 13 2022​
+
+Cesaroni Technology Inc has noticed that there has been a higher failure rate than normally expected on Pro54 2G SK (J145) reloads. We have been looking into this matter and have verified the anomaly which stems from an over-pressurization after ignition.
+
+Upon investigation it appears the cause is due to the tape around the igniter pellet plugging the bore of the nozzle upon ignition.
+
+From here forward the Pro 54 2G Skidmark (699J145-19A) and 2G Red Lightning motors (614I100-17A) will no longer have an ignition pellet but instead will have a dipped igniter, like our larger Pro 54 LB motors.
+
+However, to address all the affected reloads currently in circulation CTI has approved a small “in-field” modification to fix the issue. This modification can be done by the end-user during preparation for launch and simply involves removing the ignition pellet and replacing the supplied e-match. CTI has successfully conducted an entire series of motor testing with this modification. We also hope that if any end-user of these affected reloads does not feel comfortable conducting this modification themselves, they can seek the assistance of any ProX dealers at the launch site during preparation for flight. Furthermore, the current e-match supplied with the reloads will not be sufficient to ignite the motor without a pellet, therefore a typical “pyrogen type” igniter will be required. We will supply a number of these igniters to our ProX dealers to give out with the reloads that haven’t yet been modified.
+
+A copy of the in-field modification instructions is included with this bulletin and can also be found on our website. It will also be supplied to the ProX dealers for public distribution.
+
+Instructions for Pro54 2G LB motors
+
+Pellet Removal
+
+Sep 13, 2022​
+
+Cesaroni Technology Inc has noticed that there has been a higher failure rate than normally expected on Pro54 2G SK (J145) reloads. We have been looking into this matter and have verified the anomaly which stems from an over-pressurization after ignition.
+
+Upon investigation it appears the cause is due to the tape around the igniter pellet plugging the bore of the nozzle upon ignition. To fix the issue, the pellet must be removed from the motor grain. All motors with propellant manufacturing date after September 15, 2022, will have already been modified and be identified with a CTI “QC Approved” sticker attached to the reload packaging. Motors that have a “Pellet Removal Required” or no label will need to remove the pellet.
+
+To remove the pellet from the motor grain, begin by unpackaging the reload and remove either the forward closure or aft closure (nozzle) from the phenolic liner. Then remove the propellant grain from the phenolic liner.
+
+Next, remove the pellet from the grain. To conduct this procedure, use an instrument/tool which can be inserted through the aft bore of the grain. This will assist in pushing the pellet out the top/forward of the grain. Apply a constant pressure evenly on this tool to extract the pellet. DO NOT bang, hammer, pound, etc. on the pellet since they are brittle. Only a few pounds of force are required to dislodge the pellet. The instrument/tool can be any rod with a smaller diameter than the bore of the propellant grain (i.e. Ø1/2in). The instrument/tool MUST have a flat top (such as the back of pen, wooden dowel, etc). Ensure it is not pointed or sharp which may cause the brittle pellet to break up. After removal replace the grain into the phenolic liner and replace the forward closure and/or nozzle that was previously removed. Then proceed to assemble the motor as per the instructions, after adjusting the delay if required.
+
+Furthermore, the current e-match supplied with the reloads will not be sufficient to ignite the motor without a pellet, therefore a typical “pyrogen type” igniter will be required. A number of igniters will be supplied to the dealers for customers who have already purchased reloads previously.
+
+Dealers Inventory:
+
+To address the ProX dealers’ current inventory of motors (Pro 54 2G SK & RL) that are affected but not yet sold to the public, CTI is asking all dealers to place a label on the affected reload packaging identifying it as requiring the “in-field modification”. CTI can supply any dealers with either an electronic copy of label details for immediate printing or CTI can ship the label direct for them to be applied (at our cost). Please inform your CTI representative of which method works best for your time/schedule.
+
+In addition, all future Pro 54 2G SK & RL reloads manufactured by CTI after September 15, 2022, will have an additional label (“QC Approved”) placed on the packaging identifying it as not requiring the in-field modification.
+
+This will be done to reduce confusion between future reloads. We will keep this identification process in place for the next 2 years (or longer if deemed necessary).
+
+We sincerely apologize for any inconvenience or hobby rockets that have been affected by this issue. For any hobby rocket failures in flight that occurred because of this pellet issue please follow the regular warranty process by contacting your ProX dealer. The dealers will then provide all the details to CTI so we can ensure you receive the appropriate warranty.
+
+Sincerely,
+Cesaroni Technology Inc
+2561 Stouffville Road
+Gormley, Ontario
+L0H 1G0
+Phone: 905-887-2370
+Fax: 905-887-2375b
+Site: www.cesaroni.net www.pro38.com');
