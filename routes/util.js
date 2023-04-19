@@ -85,6 +85,17 @@ function formatDateLocal(req, v) {
 
 let MfrList = [], MfrQueried;
 
+const DefaultMfrs = [
+  'AeroTech',
+  'Animal Motor Works',
+  'Cesaroni Technology',
+  'Ellis Mountain',
+  'Estes Industries',
+  'Loki Research',
+  'Quest Aerospace',
+  'Southern Cross Rocketry',
+];
+
 function loadMfrNames() {
   return new Promise((resolve, reject) => {
     let now = new Date();
@@ -103,12 +114,13 @@ function loadMfrNames() {
               .on('data', chunk => body += chunk)
               .on('end', () => {
                 xml2js.parseString(body, (err, data) => {
-                  if (err)
-                    return reject(err);
-
-                  let mfrs = data['metadata-response'].manufacturers;
-                  if (mfrs && mfrs.length == 1 && mfrs[0].manufacturer.length > 0)
-                    MfrList = mfrs[0].manufacturer.map(o => o._);
+                  if (err) {
+                    MfrList = DefaultMfrs;
+                  } else {
+                    let mfrs = data['metadata-response'].manufacturers;
+                    if (mfrs && mfrs.length == 1 && mfrs[0].manufacturer.length > 0)
+                      MfrList = mfrs[0].manufacturer.map(o => o._);
+                  }
                   MfrQueried = now;
                   MfrList.sort();
                   resolve(MfrList);
