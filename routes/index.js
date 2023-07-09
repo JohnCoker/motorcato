@@ -22,7 +22,7 @@ router.get(['/', 'index.html'], function(req, res, next) {
       if (r.document_name != null)
         url = '/document/' + escape(r.document_name);
       else if (r.url != null)
-        url = r.uri;
+        url = r.url;
       else
         url = '/notification/' + r.id;
       props.notifications.push({
