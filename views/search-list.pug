@@ -14,6 +14,7 @@ block content
           th(data-priority="5" title="motor manufacturer") Manufacturer
           th(data-priority="5" title="common name of motor") Motor
           th(data-priority="3" title="motor type") Type
+          th(data-priority="3" title="date code") Code
           th(data-priority="4" title="date of reported failure") Date
           th(data-priority="2" title="failure modes reported") Failure
           th(data-priority="1" title="geographic location motor was used") Location
@@ -32,6 +33,7 @@ block content
               else
                 | #{row.motor_type}
 
+            td= row.serial_no
             td(data-sort=row.failure_date_iso)= row.failure_date_local
             td= row.fail_summary
             td= row.location
