@@ -7,5 +7,5 @@
   "logo": "http://node-js-sample.herokuapp.com/node.svg",
   "keywords": ["rocketry", "rocket motor failure", "rocket engine failure"],
   "image": "heroku/nodejs",
-  "stack": "heroku-22"
+  "stack": "heroku-24"
 }
