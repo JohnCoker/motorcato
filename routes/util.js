@@ -66,7 +66,7 @@ function searchURL(o) {
 function parseDateISO(v) {
   if (v == null)
     return;
-  let date = moment(v.trim(), 'YYYY-M-D', true);
+  let date = moment(v.trim(), 'YYYY-M-D');
   if (date != null && date.isValid())
     return date;
 }
@@ -321,7 +321,7 @@ function searchQuery(req, res, params) {
           comparisons.push(info.col + " is null");
           criteria[key] = 'null';
         } else if (info.type == 'date') {
-          value = moment(value, 'YYYY-M-D', true);
+          value = moment(value, 'YYYY-M-D');
           if (value.isValid()) {
             compare = compareOp(key);
             comparisons.push(info.col + " " + compare + " '" + value.format("YYYY-MM-DD") + "'");

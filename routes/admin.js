@@ -500,7 +500,7 @@ router.post('/notification/:id', function(req, res, next) {
 function updateNotification(props, req, res, next) {
   let failed = false;
 
-  let date = moment(req.body.date, 'YYYY-M-D', true);
+  let date = moment(req.body.date, 'YYYY-M-D');
   if (date == null || !date.isValid()) {
     props.errors.push('Please enter the date on which the notification was posted.');
     failed = true;
