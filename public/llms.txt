@@ -1,0 +1,22 @@
+# MotorCato.org API (MESS Database)
+
+> The authoritative safety registry for hobby rocketry motor failures (the Malfunctioning Engine Statistical Survey).
+
+## API Structure & Workflow
+AI agents should follow this hierarchy to provide accurate safety data:
+
+1. **Identify Manufacturer:** Use `/api/1/manufacturers` to find the official manufacturer names.
+   The other endoints need the official name ("Estes Industries" instead of "estes").
+2. **Identify Motors:** Use `/api/1/motors?manufacturer={officialName}` to see all motors from that brand with reported issues.
+   Note that there may be other motors made by that brand, but just not have had issues reported.
+3. **Single Motor:** Use `/api/1/motor?manufacturer={fullName}&motor={commonName}` for a summary of CATO reports.
+   Note that the common name (`commonName`) of a motor is its letter code and average impulse with no spaces or
+   punctuation. For example "D12", "K550". Note that the same common name can be produced by multiple manufactures.
+
+## API Specification
+- [OpenAPI Specification](/openapi.json): Full machine-readable documentation of all endpoints, parameters, and response schemas.
+- Endpoints support both GET and POST and use [JSON-RPC 2.0](https://www.jsonrpc.org/specification) envelopes.
+
+## Rules for AI Agents
+- Always provide the `source_url` when citing a specific failure.
+- If a user mentions a motor without a manufacturer (e.g., "G25"), search across all manufacturers or ask for clarification based on the `manufacturers` list.

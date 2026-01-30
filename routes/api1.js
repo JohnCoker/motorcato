@@ -5,16 +5,14 @@ const express = require('express'),
       searchURL = require('./util.js').searchURL;
 
 function envelope(req, res) {
-  let id = req.body && req.body.id || req.query && req.query.id;
   let obj = {
     "jsonrpc": "2.0",
+    "id": (req.body && req.body.id) ?? (req.query && req.query.id) ?? null,
   };
-  if (id != null)
-    obj.id = id;
-  else
-    obj.id = null;
   return obj;
 }
+
+const ORIGIN = 'https://www.motorcato.org';
 
 // https://www.jsonrpc.org/specification#error_object
 const ParseError = -32700;
@@ -69,7 +67,6 @@ function manufacturers(req, res, method, params) {
     if (err)
       return error(req, res, params, ServerError, 'Unable to query database.');
 
-    let row = q.rows[0];
     let result = {
       count: q.rows.length,
       manufacturers: [],
@@ -77,13 +74,15 @@ function manufacturers(req, res, method, params) {
     q.rows.forEach(row => {
       let info = {
         name: row.manufacturer,
-        failureCount: row.count,
+        failureCount: toCount(row.count),
       }
       if (row.failure_date != null)
-        info.last_failure = formatDateISO(row.failure_date);
-      row.searchURL = searchURL({ manufacturer: info.name });
+        info.lastFailure = formatDateISO(row.failure_date);
+      info.searchURL = searchURL({ manufacturer: info.name });
+      info.source_url = ORIGIN + info.searchURL;
       result.manufacturers.push(info);
     });
+    result.source_url = ORIGIN + '/';
     sendResult(req, res, params, result);
   });
 }
@@ -93,6 +92,55 @@ router.get('/manufacturers', function(req, res, next) {
 });
 router.post('/manufacturers', function(req, res, next) {
   readBody(req, res, next, manufacturers);
+});
+
+/*
+ * /api/1/motors
+ *
+ * - manufacturer: full manufacturer name ("AeroTech")
+ */
+function motors(req, res, method, params) {
+  params = params || {};
+  let mfr = params.manufacturer;
+  if (mfr == null || mfr === '')
+    return sendError(req, res, params, InvalidParams, 'Missing "manufacturer" name param.');
+
+  let select = ("select common_name, count(*) as failure_count, max(failure_date) as last_failure from reports" +
+                " where manufacturer = " + quoteSqlStr(mfr) +
+                " and status != 'rejected'" +
+                " group by common_name");
+  req.pool.query(select, (err, q) => {
+    if (err)
+      return error(req, res, params, ServerError, 'Unable to query database.');
+
+    const result = {
+      count: q.rows.length,
+      motors: [],
+    };
+    q.rows.forEach(row => {
+      const name = row.common_name;
+      let info = {
+        manufacturer: mfr,
+        name,
+        failureCount: toCount(row.failure_count),
+      };
+      if (row.last_failure != null)
+        info.lastFailure = formatDateISO(row.last_failure);
+      info.searchURL = searchURL({ manufacturer: mfr, name });
+      info.source_url = ORIGIN + info.searchURL;
+      result.motors.push(info);
+    });
+    result.searchURL = searchURL({ manufacturer: mfr });
+    result.source_url = ORIGIN + result.searchURL;
+    sendResult(req, res, params, result);
+  });
+}
+
+router.get('/motors', function(req, res, next) {
+  motors(req, res, undefined, req.query);
+});
+router.post('/motors', function(req, res, next) {
+  readBody(req, res, next, motors);
 });
 
 /*
@@ -110,7 +158,7 @@ function motor(req, res, method, params) {
   if (name == null || name === '')
     return sendError(req, res, params, InvalidParams, 'Missing "motor" name param.');
 
-  let select = ("select count(*), max(failure_date) as failure_date from reports" +
+  let select = ("select count(*), max(failure_date) as last_failure from reports" +
                 " where manufacturer = " + quoteSqlStr(mfr) + " and common_name = " + quoteSqlStr(name) +
                 " and status != 'rejected'");
   req.pool.query(select, (err, q) => {
@@ -121,11 +169,12 @@ function motor(req, res, method, params) {
     let result = {
       manufacturer: mfr,
       motor: name,
-      failureCount: row.count,
+      failureCount: toCount(row.count),
     };
-    if (row.failure_date != null)
-      result.last_failure = formatDateISO(row.failure_date);
+    if (row.last_failure != null)
+      result.lastFailure = formatDateISO(row.last_failure);
     result.searchURL = searchURL({ manufacturer: mfr, name: name });
+    result.source_url = ORIGIN + result.searchURL;
     sendResult(req, res, params, result);
   });
 }
@@ -146,10 +195,13 @@ function dispatch(req, res, method, params) {
     sendError(req, res, params, InvalidMethod, 'JSON RPC method must be specified.');
   else if (method == 'manufacturers')
     manufacturers(req, res, method, params);
+  else if (method == 'motors')
+    motors(req, res, method, params);
   else if (method == 'motor')
     motor(req, res, method, params);
   else
-    sendError(req, res, params, InvalidMethod, 'JSON RPC method unknown.');
+    sendError(req, res, params, InvalidMethod,
+              'JSON RPC method unknown (expected manufacturers, motors, or motor).');
 }
 
 router.get('*', function(req, res, next) {
@@ -158,5 +210,16 @@ router.get('*', function(req, res, next) {
 router.post('*', function(req, res, next) {
   readBody(req, res, next, dispatch);
 });
+
+function toCount(c) {
+  if (typeof c == 'bigint')
+    return c;
+  if (typeof c == 'string')
+    c = parseInt(c);
+  if (typeof c != 'number' || !isFinite(c))
+    return 0;
+  else
+    return c;
+}
 
 module.exports = router;
