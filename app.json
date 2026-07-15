@@ -1,0 +1,11 @@
+{
+  "name": "motorcato",
+  "description": "MESS reports site",
+  "website": "https://motorcato.org/",
+  "logo": "https://motorcato.org/images/logo64.png",
+  "repository": "https://github.com/JohnCoker/motorcato",
+  "logo": "http://node-js-sample.herokuapp.com/node.svg",
+  "keywords": ["rocketry", "rocket motor failure", "rocket engine failure"],
+  "image": "heroku/nodejs",
+  "stack": "heroku-24"
+}
